@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="aspect-ratio" content="3/4">
     <meta name="nova-include" content="nova.css">
     <link rel="stylesheet" href="../nova.css">
     <meta name="capabilities" content="contacts">
@@ -302,12 +301,14 @@
     <script>
         var contacts = {
             "darkdot": {
+                "cat": "work",
                 "note": "omg darkie",
                 "email": "hi@hello.com",
                 "discord": "dark.dot",
                 "rotur": "darkdot"
             },
             "nova": {
+                "cat": "work",
                 "email": "hi@nova.com",
                 "discord": "novaos",
                 "rotur": "nova"
@@ -315,17 +316,17 @@
         }
 
         var userslist = document.getElementById("userslist");
-            userslist.innerHTML = '';
+        userslist.innerHTML = '';
         Object.keys(contacts).forEach((key) => {
-            let desc = (contacts[key].note) ? contacts[key].note: Object.values(contacts[key])[0];
+            let desc = (contacts[key].note) ? contacts[key].note : Object.values(contacts[key])[0];
+            const imgUrl = `https://avatars.rotur.dev/${key}`;
             const code = `<div class="pfppart">
-                    <img
-                        src="https://cdn.vectorstock.com/i/500p/97/68/account-avatar-dark-mode-glyph-ui-icon-vector-44429768.jpg">
-                </div>
-                <div class="datapart">
-                    <div class="name">${key}</div>
-                    <div class="desc">${desc}</div>
-                </div>`;
+<img src="${imgUrl}" onerror="this.onerror=null;this.src='https://cdn.vectorstock.com/i/500p/97/68/account-avatar-dark-mode-glyph-ui-icon-vector-44429768.jpg'">
+</div>
+<div class="datapart">
+<div class="name">${key}</div>
+                    <div class="desc">${desc}</div></div>`;
+
             const elem = document.createElement("div");
             elem.classList.add("user");
             elem.innerHTML = code;

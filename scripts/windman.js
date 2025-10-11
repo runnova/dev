@@ -222,41 +222,48 @@ function attachResizeHandlers(windowDiv) {
                 zIndex: 999, backgroundColor: 'transparent', cursor: resizer.cursor
             });
             document.body.appendChild(iframeOverlay);
-
             function resizeMove(ev) {
-                let dx = ev.clientX - startX;
-                let dy = ev.clientY - startY;
+    let dx = ev.clientX - startX;
+    let dy = ev.clientY - startY;
+    const minWidth = parseInt(windowDiv.style.minWidth) || 100;
+    const minHeight = parseInt(windowDiv.style.minHeight) || 100;
 
-                if (resizer.class.includes("right")) {
-                    let newWidth = startWidth + dx;
-                    if (newWidth > 50) {
-                        windowDiv.style.width = newWidth + "px";
-                    }
-                }
+    if (resizer.class.includes("right")) {
+        let newWidth = Math.max(startWidth + dx, minWidth);
+        windowDiv.style.width = newWidth + "px";
+    }
 
-                if (resizer.class.includes("bottom")) {
-                    let newHeight = startHeight + dy;
-                    if (newHeight > 50) {
-                        windowDiv.style.height = newHeight + "px";
-                    }
-                }
+    if (resizer.class.includes("bottom")) {
+        let newHeight = Math.max(startHeight + dy, minHeight);
+        windowDiv.style.height = newHeight + "px";
+    }
 
-                if (resizer.class.includes("left")) {
-                    let newWidth = startWidth - dx;
-                    if (newWidth > 50) {
-                        windowDiv.style.width = newWidth + "px";
-                        windowDiv.style.left = startLeft + dx + "px";
-                    }
-                }
+    if (resizer.class.includes("left")) {
+        let newWidth = startWidth - dx;
+        let newLeft = startLeft + dx;
 
-                if (resizer.class.includes("top")) {
-                    let newHeight = startHeight - dy;
-                    if (newHeight > 50) {
-                        windowDiv.style.height = newHeight + "px";
-                        windowDiv.style.top = startTop + dy + "px";
-                    }
-                }
-            }
+        if (newWidth < minWidth) {
+            newWidth = minWidth;
+            newLeft = startLeft + (startWidth - minWidth);
+        }
+
+        windowDiv.style.width = newWidth + "px";
+        windowDiv.style.left = newLeft + "px";
+    }
+
+    if (resizer.class.includes("top")) {
+        let newHeight = startHeight - dy;
+        let newTop = startTop + dy;
+
+        if (newHeight < minHeight) {
+            newHeight = minHeight;
+            newTop = startTop + (startHeight - minHeight);
+        }
+
+        windowDiv.style.height = newHeight + "px";
+        windowDiv.style.top = newTop + "px";
+    }
+}
 
 
             function stopResize(event) {

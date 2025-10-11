@@ -1241,6 +1241,26 @@
 			}
 		}
 
+		async function loadVisualizerFromScript(scriptContent) {
+			try {
+				const blob = new Blob([scriptContent], { type: 'application/javascript' });
+				const url = URL.createObjectURL(blob);
+				const module = await import(url);
+				URL.revokeObjectURL(url);
+
+				if (!module.default) throw new Error("Module has no default export");
+				if (currentVisualizer?.destroy) currentVisualizer.destroy();
+
+				currentVisualizer = new module.default(canvas, analyser, getAudioData);
+				visualizerModule = module;
+
+				console.log(`Visualizer loaded from script`);
+			} catch (e) {
+				console.error("Failed to load visualizer:", e);
+			}
+		}
+
+
 		function animate() {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1390,7 +1410,7 @@
 				callback: async (msg) => {
 					const file = await ntxSession.send("fileGet.byId", msg.key);
 					readthefile(file, file.fileName);
-console.log(msg.key, file)
+					console.log(msg.key, file)
 					eventBus.deliver({
 						type: "musicplr",
 						event: "sessionKill",
@@ -1415,8 +1435,8 @@ console.log(msg.key, file)
 						}
 					});
 					setTimeout(async () => {
-					const file = await ntxSession.send("fileGet.byId", myWindow.params.data);
-					readthefile(file, file.fileName);
+						const file = await ntxSession.send("fileGet.byId", myWindow.params.data);
+						readthefile(file, file.fileName);
 
 					}, 500)
 				}

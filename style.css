@@ -155,9 +155,7 @@ nav [navobj] {
 }
 
 .window {
-	min-width: 110px;
 	position: absolute;
-	min-height: 200px;
 	background-color: transparent;
 	border-radius: var(--siz-radius1);
 	font-size: var(--font-size-normal);
@@ -1779,13 +1777,16 @@ div#seapppreview {
 
 	#appdmod,
 	#searchwindow {
-		width: calc(100% - 45px);
-		height: calc(100vh - 100px);
-		padding: 22px;
-		bottom: 10px;
-		box-shadow: none;
-		border-radius: 0;
-		max-height: none;
+        width: calc(100% - 45px);
+        height: fit-content;
+        padding: 22px;
+        box-shadow: none;
+        border-radius: 0;
+        max-height: 80vh;
+	}
+
+	.navWindows {
+    margin-bottom: 50px;
 	}
 
 	.searchwincont {
@@ -1873,11 +1874,11 @@ div#seapppreview {
 	}
 
 	#appsindeck {
-		height: 100%;
+        height: fit-content;
 		overflow-y: auto;
 		max-height: calc(100vh - 14rem) !important;
 		justify-content: space-around;
-		justify-items: center;
+		justify-items: flex-start;
 	}
 
 	#dashboard {
