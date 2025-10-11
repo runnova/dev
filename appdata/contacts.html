@@ -34,7 +34,7 @@
             &>.search {
                 display: flex;
                 flex-direction: row;
-                gap: .5em;
+                gap: .2em;
                 background-color: var(--col-bg3);
                 border-radius: var(--siz-radius1);
                 align-items: center;
@@ -63,8 +63,54 @@
         }
 
         .contact_detail {
-            flex: 5;
-            position: relative;
+            flex: 5;display: flex
+;
+    flex-direction: column;
+
+            &.edit>#editorHead {
+                display: flex;
+            }
+
+            &.edit>.addnew {
+                display: none;
+            }
+
+            &>#userData {
+            overflow-y: auto;
+            padding-bottom: 5em;
+            }
+
+            &>#editorHead {
+                display: none;
+                flex-direction: row;
+                justify-content: space-between;
+                background-color: var(--col-bg3);
+                gap: .5em;
+                padding: .3em;
+                align-items: center;
+
+                &>span {
+                    flex: 1;
+                }
+
+                &>.material-symbols-rounded {
+                    padding: .3em;
+                    border-radius: var(--siz-radius1);
+
+                    &:hover {
+                        background: #86868621;
+                    }
+                }
+            }
+
+            &.edit .field>input {
+                background-color: var(--col-bg2);
+                padding: .3em .7em;
+            }
+
+            &.edit .field>span {
+                transform: translateX(.8em);
+            }
         }
 
         @font-face {
@@ -95,7 +141,7 @@
                 padding: .5em;
                 align-items: flex-start;
                 border-radius: var(--siz-radius1);
-                margin-bottom: .5em;
+                margin-bottom: .2em;
                 transform: scale(1.05);
                 transition: .2s;
 
@@ -194,7 +240,7 @@
 
         #userData {
             display: grid;
-            gap: .3em;
+            gap: .5em;
             grid-template-columns: repeat(auto-fit, minmax(250px, 2fr));
             padding: .8em;
         }
@@ -206,17 +252,15 @@
             &>span {
                 font-size: small;
                 opacity: .7;
-                transform: translateX(.8em);
             }
 
             &>input {
-                background-color: var(--col-bg2);
+                background-color: transparent;
+                padding: 0;
                 border: 0;
                 font: inherit;
                 color: inherit;
                 border-radius: var(--siz-radius1);
-                padding: .3em .7em;
-
             }
         }
 
@@ -264,15 +308,21 @@
             </div>
         </div>
     </div>
-    <div class="contact_detail panels">
+    <div class="contact_detail panels" id="contact_dets">
+        <div id="editorHead">
+            <i class="material-symbols-rounded">close</i>
+            <span>Edit</span>
+            <i class="material-symbols-rounded">check</i>
+        </div>
         <div class="profileCard">
             <div class="pfppart">
-                <img
-                    src="https://cdn.vectorstock.com/i/500p/97/68/account-avatar-dark-mode-glyph-ui-icon-vector-44429768.jpg">
+                <img src="https://cdn.vectorstock.com/i/500p/97/68/account-avatar-dark-mode-glyph-ui-icon-vector-44429768.jpg"
+                    onerror="this.onerror=null;this.src='https://cdn.vectorstock.com/i/500p/97/68/account-avatar-dark-mode-glyph-ui-icon-vector-44429768.jpg'"
+                    id="mainpPfp">
             </div>
             <div class="datapart">
-                <div class="name">John smith</div>
-                <div class="desc">CEO</div>
+                <div class="name" id="mainpName">John smith</div>
+                <div class="desc" id="mainpDesc">CEO</div>
             </div>
         </div>
         <div id="userData">
@@ -294,8 +344,8 @@
             </div>
 
         </div>
-        <div class="addnew">
-            <i class="material-symbols-rounded">add</i>
+        <div class="addnew" onclick="editDets()">
+            <i class="material-symbols-rounded">edit</i>
         </div>
     </div>
     <script>
@@ -319,7 +369,7 @@
         userslist.innerHTML = '';
         Object.keys(contacts).forEach((key) => {
             let desc = (contacts[key].note) ? contacts[key].note : Object.values(contacts[key])[0];
-            const imgUrl = `https://avatars.rotur.dev/${key}`;
+            const imgUrl = `https://avatars.rotur.dev/${contacts[key].rotur}`;
             const code = `<div class="pfppart">
 <img src="${imgUrl}" onerror="this.onerror=null;this.src='https://cdn.vectorstock.com/i/500p/97/68/account-avatar-dark-mode-glyph-ui-icon-vector-44429768.jpg'">
 </div>
@@ -330,8 +380,56 @@
             const elem = document.createElement("div");
             elem.classList.add("user");
             elem.innerHTML = code;
+            elem.onclick = () => {
+                viewProfile(key)
+            }
             userslist.appendChild(elem);
         })
+        function viewProfile(user) {
+            document.getElementById("mainpName").innerText = user;
+            let desc = contacts[user].note ? contacts[user].note : Object.values(contacts[user])[0];
+            document.getElementById("mainpDesc").innerText = desc;
+            document.getElementById("mainpPfp").src = `https://avatars.rotur.dev/${contacts[user].rotur}`;
+            let userData = document.getElementById("userData");
+            userData.innerHTML = '';
+            for (let key in contacts[user]) {
+                let div = document.createElement("div");
+                div.classList.add("field");
+                let span = document.createElement("span");
+                span.textContent = key;
+                let input = document.createElement("input");
+                input.placeholder = "value";
+                input.value = contacts[user][key];
+                input.disabled = true;
+                div.appendChild(span);
+                div.appendChild(input);
+                userData.appendChild(div);
+            }
+            let head = document.getElementById("editorHead").querySelectorAll("i.material-symbols-rounded");
+            head[1].onclick = function () {
+                let inputs = userData.querySelectorAll("div");
+                inputs.forEach(d => {
+                    let key = d.querySelector("span").textContent;
+                    let val = d.querySelector("input").value;
+                    contacts[user][key] = val;
+                });
+                viewProfile(user);
+                document.getElementById("contact_dets").classList.remove("edit");
+            };
+            head[0].onclick = function () {
+                viewProfile(user);
+                document.getElementById("contact_dets").classList.remove("edit");
+            };
+        }
+
+        function editDets() {
+            document.getElementById('contact_dets').classList.add('edit');
+            let inputs = userData.querySelectorAll("div");
+            inputs.forEach(d => {
+                d.querySelector("input").disabled = false;
+            });
+        }
+
     </script>
 </body>
 
