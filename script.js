@@ -386,12 +386,11 @@ async function openn() {
 		const el = gid("windowscont");
 		if (el.classList.contains("reselector")) {
 			el.classList.toggle("hidden")
-			document.activeElement.blur()
 			return;
 		}
-		gid("appdmod").showModal();
 	}
 	gid("appdmod").showModal();
+			document.activeElement.blur()
 }
 async function loadrecentapps() {
 	gid("serrecentapps").innerHTML = ``
