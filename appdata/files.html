@@ -584,7 +584,6 @@
 		a.dropdownerthebob span {
 			font-size: 20px !important;
 			color: var(--colors-text-section);
-			transform: rotate(-90deg);
 			transition: var(--time2);
 		}
 
@@ -594,9 +593,11 @@
 			background-color: var(--col-bg3);
 			border-radius: var(--siz-radius1);
 
-			&>span {
-				transform: none;
-			}
+			&>span{
+				transform: scale(0.9);
+				&.droptglbtn {
+				transform: translateY(3px);
+			}}
 		}
 
 		[flap-fl-topnav] div {
@@ -1573,7 +1574,7 @@
 			for (const [groupName, group] of Object.entries(groups)) {
 				const groupToggle = document.createElement("a");
 				groupToggle.classList.add("dropdownerthebob");
-				groupToggle.innerHTML = `<span class="material-symbols-rounded">expand_more</span> <b>${groupName}</b>`;
+				groupToggle.innerHTML = `<span class="material-symbols-rounded droptglbtn">expand_more</span> <b>${groupName}</b>`;
 				const groupMenu = document.createElement("div");
 				groupMenu.className = "dropup-content nested";
 				groupToggle.appendChild(groupMenu);
@@ -1949,7 +1950,7 @@
 			for (const [groupName, group] of Object.entries(fileActions)) {
 				const groupToggle = document.createElement("a");
 				groupToggle.classList.add("dropdownerthebob");
-				groupToggle.innerHTML = `<span class="material-symbols-rounded" style="color:#bae1ff;">expand_more</span> <b>${groupName}</b>`;
+				groupToggle.innerHTML = `<span class="material-symbols-rounded droptglbtn" >expand_more</span> <b>${groupName}</b>`;
 				const groupMenu = document.createElement("div");
 				groupMenu.className = "dropup-content nested";
 				groupToggle.appendChild(groupMenu);
