@@ -390,7 +390,7 @@ async function openn() {
 		}
 	}
 	gid("appdmod").showModal();
-			document.activeElement.blur()
+	document.activeElement.blur()
 }
 async function loadrecentapps() {
 	gid("serrecentapps").innerHTML = ``
@@ -989,15 +989,17 @@ function openModal(type, { title = '', message, options = null, status = null, p
 		const modalItemsCont = document.createElement('div');
 		modalItemsCont.classList.add('modal-items');
 
-		const icon = document.createElement('span');
-		icon.classList.add('material-symbols-rounded');
-		let ic = "warning";
-		if (status === "success") ic = "check_circle";
-		else if (status === "failed") ic = "dangerous";
-		icon.textContent = ic;
-		icon.classList.add('modal-icon');
-		modalItemsCont.appendChild(icon);
+		if (status) {
+			const icon = document.createElement('span');
+			icon.classList.add('material-symbols-rounded');
+			let ic = "warning";
+			if (status === "success") ic = "check_circle";
+			else if (status === "failed") ic = "dangerous";
+			icon.textContent = ic;
+			icon.classList.add('modal-icon');
+			modalItemsCont.appendChild(icon);
 
+		}
 		if (title && title.length > 0) {
 
 			const h1 = document.createElement('h1');

@@ -593,11 +593,13 @@
 			background-color: var(--col-bg3);
 			border-radius: var(--siz-radius1);
 
-			&>span{
+			&>span {
 				transform: scale(0.9);
+
 				&.droptglbtn {
-				transform: translateY(3px);
-			}}
+					transform: translateY(3px);
+				}
+			}
 		}
 
 		[flap-fl-topnav] div {
@@ -1528,11 +1530,11 @@
 						title: "Sort files",
 						onclick: async function () {
 							const options = [
-								{ label: "Time ↑", mode: "time_asc", icon: "schedule" },
-								{ label: "Time ↓", mode: "time_desc", icon: "schedule" },
+								{ label: "Oldest first", mode: "time_asc", icon: "schedule" },
+								{ label: "Newest first", mode: "time_desc", icon: "schedule" },
 								{ label: "Name A-Z", mode: "name_asc", icon: "sort_by_alpha" },
 								{ label: "Name Z-A", mode: "name_desc", icon: "sort_by_alpha" },
-								{ label: "Type", mode: "type", icon: "category" }
+								{ label: "File type", mode: "type", icon: "category" }
 							];
 							const selected = await window.parent.showDropdownModal(
 								"Sort files",
@@ -1559,11 +1561,11 @@
 						})(),
 						label: (() => {
 							const mapping = {
-								time_asc: "Time ↑",
-								time_desc: "Time ↓",
+								time_asc: "Oldest first",
+								time_desc: "Newest first",
 								name_asc: "Name A-Z",
 								name_desc: "Name Z-A",
-								type: "Type"
+								type: "File type"
 							};
 							return mapping[currentSort] || "Sort files";
 						})()
@@ -2382,6 +2384,30 @@
 					label: 'Set As Wallpaper',
 					action: (itemuid) => window.parent.makewall(itemuid),
 					condition: async (file) => (await ntxSession.send("utility.getBaseFileType", getFileExtension(file.fileName))) === 'image',
+				},
+				exportFile: {
+					icon: 'file_save',
+					icon_color: '#b5ead7',
+					label: 'Export file',
+					action: async (itemuid) => {
+						let file = await ntxSession.send("fileGet.byId", itemuid)
+						let [meta, b64] = file.content.split(',')
+						let mime = meta.match(/:(.*?);/)[1]
+						let binary = atob(b64)
+						let len = binary.length
+						let bytes = new Uint8Array(len)
+						for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i)
+						let blob = new Blob([bytes], { type: mime })
+						let url = URL.createObjectURL(blob)
+						let link = document.createElement("a")
+						link.href = url
+						link.download = file.fileName
+						document.body.appendChild(link)
+						link.click()
+						document.body.removeChild(link)
+						URL.revokeObjectURL(url)
+					},
+					condition: (file) => true,
 				},
 				copyId: {
 					icon: 'content_copy',
