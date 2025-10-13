@@ -819,18 +819,43 @@ async function getFolderNames() {
         return null;
     }
 }
-async function moveFileToFolder(flid, dest) {
-    console.log("Moving file: " + flid + " to: " + dest);
-    let fileToMove = await getFileById(flid);
-    if (!fileToMove) return; // Ensure the file exists
-    let removeoutput = await remfile(flid);
-    await createFile(dest, fileToMove.fileName, fileToMove.type, fileToMove.content, fileToMove.metadata);
-    eventBusWorker.deliver({
-        "type": "memory",
-        "event": "update",
-        "id": "moveFile",
-        "key": dest
-    });
+async function moveFileToFolder(fileId, destPath) {
+    await updateMemoryData();
+
+    const destFolder = await getFolderByPath(destPath);
+    if (!destFolder) throw new Error("Destination folder not found");
+
+    function moveFile(folder) {
+        for (const [key, item] of Object.entries(folder)) {
+            if (!item || typeof item !== 'object') continue;
+
+            if (item.id === fileId) {
+                destFolder[key] = item;
+                delete folder[key];
+                return true;
+            } else if (key.endsWith('/')) {
+                if (moveFile(item)) return true;
+            }
+        }
+        return false;
+    }
+
+    const moved = moveFile(memory.root);
+    if (!moved) console.error("File not found");
+
+    await setdb();
+}
+
+async function getFolderByPath(path) {
+    path = path.endsWith('/') ? path : path + '/';
+    const segments = path.split('/').filter(Boolean);
+    let folder = memory.root;
+    for (const seg of segments) {
+        const key = seg + '/';
+        if (!folder[key]) folder[key] = {};
+        folder = folder[key];
+    }
+    return folder;
 }
 async function remfile(ID) {
     try {

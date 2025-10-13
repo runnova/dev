@@ -156,7 +156,7 @@ async function getdb() {
     });
 }
 
-function setdb(x) {
+function setdb() {
     const value = {
         memory: { ...memory }
     };
