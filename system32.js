@@ -665,6 +665,31 @@ var appStorage = {
 
 // memory management
 
+async function zipFolder(folderPath) {
+  const fileNames = await getFileNamesByFolder(folderPath)
+  const files = {}
+  for (const name of fileNames) {
+    const { content } = await getFileById(name.id, 'content')
+    const base64 = content.split(',')[1]
+    files[name.name] = fflate.strToU8(atob(base64))
+  }
+  const zipped = fflate.zipSync(files)
+  return zipped
+}
+
+async function unzipToFolder(folderPath, zipUri) {
+  const base64 = zipUri.split(',')[1]
+  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0))
+  const files = fflate.unzipSync(bytes)
+  for (const name in files) {
+    const bin = files[name]
+    let binary = ''
+    for (let i = 0; i < bin.length; i++) binary += String.fromCharCode(bin[i])
+    const content = 'data:application/octet-stream;base64,' + btoa(binary)
+    await createFile(folderPath, name, 0, content, {})
+  }
+}
+
 async function getFileNamesByFolder(folderPath) {
     folderPath = folderPath.endsWith('/') ? folderPath : folderPath + '/';
     try {

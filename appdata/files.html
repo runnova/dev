@@ -1492,6 +1492,19 @@
 						icon: "keyboard_return",
 						label: "Parent",
 						disabled: isRootLevel
+					},
+					{
+						id: "zipFolder",
+						title: "Zip this folder",
+						onclick: async () => {
+							console.log(453, folderPath)
+							let zipped = await window.parent.zipFolder(folderPath);
+							let tmpflpth = folderPath.endsWith('/') ? folderPath.slice(0, -1) : folderPath
+							let toBeSavedToData = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'saveas', "value": tmpflpth + ".zip" });
+							await ntxSession.send("fileSet.createFile", toBeSavedToData.path, toBeSavedToData.name, false, zipped);
+						},
+						icon: "folder_zip",
+						label: "Zip"
 					}
 				],
 				files: [
@@ -2424,6 +2437,17 @@
 					label: 'Shortcut',
 					action: (itemuid) => addShortcut(itemuid),
 					condition: (file) => true,
+				},
+				unZip: {
+					icon: 'unarchive',
+					icon_color: '#b5ead7',
+					label: 'Unzip',
+					action: async (itemuid) => {
+						let file = await ntxSession.send("fileGet.byId", itemuid)
+						let toBeSavedToData = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'directory'});
+						await window.parent.unzipToFolder(toBeSavedToData + file.fileName, file.content);
+					},
+					condition: (file) => getFileExtension(file.fileName) == "zip",
 				},
 			},
 		}
