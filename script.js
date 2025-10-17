@@ -2094,6 +2094,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 		"scripts/dompurify.js",
 		"scripts/scripties.js",
 		"scripts/windman.js",
+		"scripts/panels.js",
 		"scripts/ntx.js"
 	];
 

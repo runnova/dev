@@ -198,292 +198,128 @@ async function buildIframeApiBridge(appid, title, winuid, perms) {
     window._messageListeners[winuid] = handleMessage;
 }
 
-async function prepareIframeContentHeadless(cont, appid, winuid) {
-    const contentString = isBase64(cont) ? decodeBase64Content(cont) : (cont || "<center><h1>Unavailable</h1>App Data cannot be read.</center>");
-    const ntxScript = `<script>
-document.addEventListener('mousedown', () => {
-    window.parent.postMessage({ type: 'iframeClick', iframeId: '${winuid}' }, '*');
+async function getSharedNtxScript(winuid, mode = "normal") {
+    const baseScript = `
+document.addEventListener('mousedown',()=>window.parent.postMessage({type:'iframeClick',iframeId:'${winuid}'},'*'));
+var myWindow={};
+class NTXSession{
+constructor(){
+this.transactionIdCounter=0;this.pendingRequests={};this.listeners={};const chunks={};
+window.addEventListener("message",t=>{
+const{transactionId:s,chunk:n,chunkIndex:i,totalChunks:o,isJson:a,success:d,error:r,type:c,payload:l}=t.data;
+if(s&&typeof d==="boolean"){
+if(a&&n!==undefined){
+if(!chunks[s])chunks[s]={chunks:[],received:0,total:o};
+chunks[s].chunks[i]=n;chunks[s].received++;
+if(chunks[s].received===o){
+const fullData=chunks[s].chunks.join("");
+delete chunks[s];
+const result=JSON.parse(fullData);
+if(this.pendingRequests[s]){this.pendingRequests[s].resolve(result);delete this.pendingRequests[s];}
+}}
+else{if(this.pendingRequests[s]){d?this.pendingRequests[s].resolve(t.data.result):this.pendingRequests[s].reject(r);delete this.pendingRequests[s];}}
+}else if(c&&l!==undefined&&this.listeners[c]){this.listeners[c].forEach(e=>e(l));}
 });
-var myWindow = {};
-window.addEventListener("message", async (e) => {
-    console.log(888, e);
-    if (e.data.type === "myWindow") {
-    console.log("TRY CALL ONSTARTUP", e.data);
-        try {
-            await onStartup();
-    console.log("ONSTARTUP OVER", e.data);
-            setTimeout(() => myWindow.close(), 0);
-        } catch (t) {}
-        myWindow = {
-            ...e.data.data,
-            close: () => {console.log("CLOSEREQ");ntxSession.send("sysUI.clwin", myWindow.windowID)},
-            setTitle: (e) => ntxSession.send("sysUI.setTitle", myWindow.windowID, e)
-        };
-        window.parent.postMessage({ data: "gfdone", iframeId: myWindow.windowID }, "*");
-    }
-});
-class NTXSession {
-    constructor() {
-        this.transactionIdCounter = 0;
-        this.pendingRequests = {};
-        this.listeners = {};
-        const chunks = {};
-        window.addEventListener("message", t => {
-            const { transactionId: s, chunk: n, chunkIndex: i, totalChunks: o, isJson: a, success: d, error: r, type: c, payload: l } = t.data;
-            if (s && typeof d === "boolean") {
-                if (a && n !== undefined) {
-                    if (!chunks[s]) chunks[s] = { chunks: [], received: 0, total: o };
-                    chunks[s].chunks[i] = n;
-                    chunks[s].received++;
-                    if (chunks[s].received === o) {
-                        const fullData = chunks[s].chunks.join("");
-                        delete chunks[s];
-                        const result = JSON.parse(fullData);
-                        if (this.pendingRequests[s]) {
-                            this.pendingRequests[s].resolve(result);
-                            delete this.pendingRequests[s];
-                        }
-                    }
-                } else {
-                    if (this.pendingRequests[s]) {
-                        d ? this.pendingRequests[s].resolve(t.data.result) : this.pendingRequests[s].reject(r);
-                        delete this.pendingRequests[s];
-                    }
-                }
-            } else if (c && l !== undefined && this.listeners[c]) {
-                this.listeners[c].forEach(e => e(l));
-            }
-        });
-    }
-        
-    generateTransactionId() {
-        return \`txn_\${Date.now()}_\${this.transactionIdCounter++}\`;
-    }
-    send(action, ...params) {
-        return new Promise((resolve, reject) => {
-            const txnId = this.generateTransactionId();
-            this.pendingRequests[txnId] = { resolve, reject };
-            window.parent.postMessage({ transactionId: txnId, action: action, params: params, iframeId: '${winuid}' }, "*");
-        });
-    }
 }
-
-var ntxSession = new NTXSession();
-
-const ntx = new Proxy({}, {
-    get(_, category) {
-        return new Proxy({}, {
-            get(_, action) {
-                return (...args) => ntxSession.send(\`\${category}.\${action}\`, ...args);
-            }
-        });
-    }
+generateTransactionId(){return\`txn_\${Date.now()}_\${this.transactionIdCounter++}\`;}
+send(action,...params){
+return new Promise((resolve,reject)=>{
+const txnId=this.generateTransactionId();
+this.pendingRequests[txnId]={resolve,reject};
+window.parent.postMessage({transactionId:txnId,action:action,params:params,iframeId:'${winuid}'},"*");
 });
+}}
+var ntxSession=new NTXSession();
+const ntx=new Proxy({},{
+get(_,category){return new Proxy({},{
+get(_,action){return(...args)=>ntxSession.send(\`\${category}.\${action}\`,...args);}
+});}
+});
+const eventBus=(()=>{const listeners=[];
+function deliver(msg){if(typeof msg!=='object'||!msg.type||!msg.event)return;
+window.parent.postMessage({__eventBus:true,payload:msg},'*');}
+function listen({type='*',event='*',callback}){listeners.push({type,event,callback});}
+window.addEventListener('message',e=>{
+const{data}=e;if(!data||!data.__eventBus||!data.payload)return;
+const msg=data.payload;
+listeners.forEach(({type,event,callback})=>{if((type===msg.type||type==='*')&&(event===msg.event||event==='*'))callback(msg);});
+});
+return{deliver,listen};})();
+`;
 
-</script>`;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${contentString}${ntxScript}<script defer>window.parent.postMessage({type:"iframeReady",windowID:"${winuid}"}, "*");</script></body></html>`;
+    const myWindowHandler = mode === "headless"
+        ? `
+window.addEventListener("message",async e=>{
+if(e.data.type==="myWindow"){
+try{await onStartup();setTimeout(()=>myWindow.close(),0);}catch(t){}
+myWindow={...e.data.data,close:()=>ntxSession.send("sysUI.clwin",myWindow.windowID),
+setTitle:e=>ntxSession.send("sysUI.setTitle",myWindow.windowID,e)};
+window.parent.postMessage({data:"gfdone",iframeId:myWindow.windowID},"*");
+}});`
+        : `
+window.addEventListener("message",async e=>{
+if(e.data.type==="myWindow"){
+myWindow={...e.data.data,close:()=>ntxSession.send("sysUI.clwin",myWindow.windowID),
+setTitle:e=>ntxSession.send("sysUI.setTitle",myWindow.windowID,e)};
+try{await greenflag();}catch(t){}
+window.parent.postMessage({data:"gfdone",iframeId:myWindow.windowID},"*");
+}else if(e.data?.type==="nova-style"&&typeof e.data.css==="string"){
+let styleTag=document.getElementById("novacsstag");
+if(!styleTag){styleTag=document.createElement("style");styleTag.id="novacsstag";document.head.appendChild(styleTag);}
+styleTag.textContent=e.data.css;
+}});`;
+
+    return `<script>${baseScript}${myWindowHandler}</script>`;
+}
+async function prepareIframeContentUnified(cont, appid, winuid, mode = "normal") {
+    let contentString = isBase64(cont) ? decodeBase64Content(cont) : (cont || "<center><h1>Unavailable</h1>App Data cannot be read.</center>");
+    let styleBlock = '';
+    if (mode === "normal") {
+        if (getMetaTagContent(contentString, 'nova-include')?.includes('nova.css')) {
+            let updatedCss = novadotcsscache || '';
+            const novaCssTag = document.getElementById('novacsstag');
+            if (novaCssTag) {
+                const customCss = novaCssTag.textContent;
+                const variableRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+                let customVariables = {};
+                let match;
+                while ((match = variableRegex.exec(customCss)) !== null)
+                    customVariables[`--${match[1]}`] = match[2].trim();
+                updatedCss = novadotcsscache.replace(/:root\s*{([^}]*)}/, (m, d) => {
+                    let upd = d.trim();
+                    for (const [k, v] of Object.entries(customVariables))
+                        upd = upd.replace(new RegExp(`(${k}\\s*:\\s*).*?;`, 'g'), `$1${v};`);
+                    return `:root { ${upd} }`;
+                });
+            }
+            styleBlock += `<style>${updatedCss}</style>`;
+        }
+        if (getMetaTagContent(contentString, 'nova-include')?.includes('material-symbols-rounded')) {
+            const fontUrl = 'https://adthoughtsglobal.github.io/resources/MaterialSymbolsRounded.woff2';
+            styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontUrl}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
+        }
+    }
+    const ntxScript = await getSharedNtxScript(winuid, mode);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">${styleBlock}</head><body>${contentString}${ntxScript}<script defer>window.parent.postMessage({type:"iframeReady",windowID:"${winuid}"}, "*");</script></body></html>`;
     return new Blob([html], { type: 'text/html' });
 }
 
-async function prepareIframeContent(cont, appid, winuid) {
-    let contentString = isBase64(cont) ? decodeBase64Content(cont) : (cont || "<center><h1>Unavailable</h1>App Data cannot be read.</center>");
-
-    let styleBlock = '';
-    if (getMetaTagContent(contentString, 'nova-include')?.includes('nova.css')) {
-        let updatedCss = novadotcsscache || '';
-        const novaCssTag = document.getElementById('novacsstag');
-        if (novaCssTag) {
-            const customCss = novaCssTag.textContent;
-            const variableRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
-            let customVariables = {};
-            let match;
-            while ((match = variableRegex.exec(customCss)) !== null) {
-                customVariables[`--${match[1]}`] = match[2].trim();
-            }
-            updatedCss = novadotcsscache.replace(/:root\s*{([^}]*)}/, (match, declarations) => {
-                let updated = declarations.trim();
-                for (const [key, val] of Object.entries(customVariables)) {
-                    const regex = new RegExp(`(${key}\\s*:\\s*).*?;`, 'g');
-                    updated = updated.replace(regex, `$1${val};`);
-                }
-                return `:root { ${updated} }`;
-            });
-        }
-        styleBlock += `<style>${updatedCss}</style>`;
-    }
-
-    async function cacheFont(url, cacheKey, maxAttempts = 2, delayMs = 2000) {
-        const cache = await caches.open('font-cache');
-        let response = await cache.match(url);
-        if (!response) {
-            for (let i = 0; i < maxAttempts; i++) {
-                try {
-                    response = await fetch(url, { cache: 'reload' });
-                    if (response.ok) {
-                        await cache.put(url, response.clone());
-                        break;
-                    }
-                } catch (_) { }
-                await new Promise(r => setTimeout(r, delayMs));
-            }
-        }
-    }
-
-    if (getMetaTagContent(contentString, 'nova-include')?.includes('material-symbols-rounded')) {
-        const fontUrl = 'https://adthoughtsglobal.github.io/resources/MaterialSymbolsRounded.woff2';
-        cacheFont(fontUrl, 'material-symbols-rounded');
-        styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontUrl}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
-    }
-
-    const ctxScript = getMetaTagContent(contentString, 'nova-include')?.includes('contextMenu') ? await fetch('scripts/ctxmenu.js').then(res => res.text()) : '';
-
-    const ntxScript = `<script defer>
-document.addEventListener('mousedown', () => {
-    window.parent.postMessage({ type: 'iframeClick', iframeId: '${winuid}' }, '*');
-});
-
-var myWindow = {};
-
-window.addEventListener("message", async e => {
-    if (e.data.type === "myWindow") {
-        myWindow = {
-            ...e.data.data,
-            close: () => ntxSession.send("sysUI.clwin", myWindow.windowID),
-            setTitle: (e) => ntxSession.send("sysUI.setTitle", myWindow.windowID, e)
-        };
-        try {
-            await greenflag();
-        } catch (t) {}
-        window.parent.postMessage({ data: "gfdone", iframeId: myWindow.windowID }, "*");
-    } else if (e.data?.type === "nova-style" && typeof e.data.css === "string") {
-        let styleTag = document.getElementById("novacsstag");
-        if (!styleTag) {
-            styleTag = document.createElement("style");
-            styleTag.id = "novacsstag";
-            document.head.appendChild(styleTag);
-        }
-        styleTag.textContent = e.data.css;
-    }
-});
-class NTXSession {
-    constructor() {
-        this.transactionIdCounter = 0;
-        this.pendingRequests = {};
-        this.listeners = {};
-        const chunks = {};
-        window.addEventListener("message", t => {
-            const { transactionId: s, chunk: n, chunkIndex: i, totalChunks: o, isJson: a, success: d, error: r, type: c, payload: l } = t.data;
-            if (s && typeof d === "boolean") {
-                if (a && n !== undefined) {
-                    if (!chunks[s]) chunks[s] = { chunks: [], received: 0, total: o };
-                    chunks[s].chunks[i] = n;
-                    chunks[s].received++;
-                    if (chunks[s].received === o) {
-                        const fullData = chunks[s].chunks.join("");
-                        delete chunks[s];
-                        const result = JSON.parse(fullData);
-                        if (this.pendingRequests[s]) {
-                            this.pendingRequests[s].resolve(result);
-                            delete this.pendingRequests[s];
-                        }
-                    }
-                } else {
-                    if (this.pendingRequests[s]) {
-                        d ? this.pendingRequests[s].resolve(t.data.result) : this.pendingRequests[s].reject(r);
-                        delete this.pendingRequests[s];
-                    }
-                }
-            } else if (c && l !== undefined && this.listeners[c]) {
-                this.listeners[c].forEach(e => e(l));
-            }
-        });
-    }
-        
-    generateTransactionId() {
-        return \`txn_\${Date.now()}_\${this.transactionIdCounter++}\`;
-    }
-    send(action, ...params) {
-        return new Promise((resolve, reject) => {
-            const txnId = this.generateTransactionId();
-            this.pendingRequests[txnId] = { resolve, reject };
-            window.parent.postMessage({ transactionId: txnId, action: action, params: params, iframeId: '${winuid}' }, "*");
-        });
-    }
-}
-
-var ntxSession = new NTXSession();
-
-const ntx = new Proxy({}, {
-    get(_, category) {
-        return new Proxy({}, {
-            get(_, action) {
-                return (...args) => ntxSession.send(\`\${category}.\${action}\`, ...args);
-            }
-        });
-    }
-});
-
-const eventBus = (() => {
-    const listeners = [];
-
-    function deliver(msg) {
-        if (typeof msg !== 'object' || !msg.type || !msg.event) return;
-        window.parent.postMessage({ __eventBus: true, payload: msg }, '*');
-    }
-
-    function listen({ type = '*', event = '*', callback }) {
-        listeners.push({ type, event, callback });
-    }
-
-    window.addEventListener('message', e => {
-        const { data } = e;
-        if (!data || !data.__eventBus || !data.payload) return;
-
-        const msg = data.payload;
-        listeners.forEach(({ type, event, callback }) => {
-            if ((type === msg.type || type === '*') && (event === msg.event || event === '*')) {
-                callback(msg);
-            }
-        });
-    });
-
-    return { deliver, listen };
-})();
-
-</script>
-`;
-
-    const fullBlobHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">${styleBlock}</head><body>${contentString}${ctxScript ? `<script>${ctxScript}</script>` : ''}${ntxScript}<script defer>window.parent.postMessage({type:"iframeReady",windowID:"${winuid}"}, "*");</script></body></html>`;
-
-    return new Blob([fullBlobHTML], { type: 'text/html' });
-}
-
 async function loadIframe(windowContent, windowLoader, loaderSpinner, cont, appid, winuid, title, params) {
-    console.log("LOADFRAME:", title)
     const iconHtml = await getAppIcon(0, appid) || defaultAppIcon;
     loaderSpinner.insertAdjacentHTML('beforebegin', iconHtml);
-
-    let registry = await getSetting(appid, "AppRegistry.json") || { perms: [] };
-    let contentBlob;
-    if (title == "headless_373452343985$#%")
-        contentBlob = await prepareIframeContentHeadless(cont, appid, winuid);
-    else
-        contentBlob = await prepareIframeContent(cont, appid, winuid);
-    const blobURL = URL.createObjectURL(contentBlob);
-
+    const registry = await getSetting(appid, "AppRegistry.json") || { perms: [] };
+    const mode = title === "headless_373452343985$#%" ? "headless" : "normal";
+    const blob = await prepareIframeContentUnified(cont, appid, winuid, mode);
+    const blobURL = URL.createObjectURL(blob);
     const iframe = document.createElement("iframe");
-    if (!registry.perms?.includes("unsandboxed")) {
+    if (!registry.perms?.includes("unsandboxed"))
         iframe.setAttribute("sandbox", "allow-scripts allow-modals");
-        iframe.setAttribute("allow", "camera; microphone");
-    }
     iframe.src = blobURL;
     iframe.onload = async () => {
-        const myWindowData = { appID: appid, windowID: winuid, setTitle: "later", ...(params && { params }) };
-        console.log("TRY INJECT MYWINDOW", myWindowData, iframe)
-        iframe.contentWindow.postMessage({ type: "myWindow", data: myWindowData }, "*");
+        const data = { appID: appid, windowID: winuid, ...(params && { params }) };
+        iframe.contentWindow.postMessage({ type: "myWindow", data }, "*");
         await buildIframeApiBridge(appid, title, winuid, registry.perms);
     };
-
     windowContent.appendChild(iframe);
     iframeReferences[winuid] = iframe.contentWindow;
     if (!winds[winuid]) winds[winuid] = {};
