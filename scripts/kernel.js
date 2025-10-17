@@ -271,7 +271,7 @@ styleTag.textContent=e.data.css;
 
     return `<script>${baseScript}${myWindowHandler}</script>`;
 }
-async function prepareIframeContentUnified(cont, appid, winuid, mode = "normal") {
+async function prepareIframeContent(cont, appid, winuid, mode = "normal") {
     let contentString = isBase64(cont) ? decodeBase64Content(cont) : (cont || "<center><h1>Unavailable</h1>App Data cannot be read.</center>");
     let styleBlock = '';
     if (mode === "normal") {
@@ -309,7 +309,7 @@ async function loadIframe(windowContent, windowLoader, loaderSpinner, cont, appi
     loaderSpinner.insertAdjacentHTML('beforebegin', iconHtml);
     const registry = await getSetting(appid, "AppRegistry.json") || { perms: [] };
     const mode = title === "headless_373452343985$#%" ? "headless" : "normal";
-    const blob = await prepareIframeContentUnified(cont, appid, winuid, mode);
+    const blob = await prepareIframeContent(cont, appid, winuid, mode);
     const blobURL = URL.createObjectURL(blob);
     const iframe = document.createElement("iframe");
     if (!registry.perms?.includes("unsandboxed"))
