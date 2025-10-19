@@ -100,7 +100,7 @@ class NTXSession {
             useNovaOffline: useNovaOffline,
             removeSWs: removeSWs,
             installdefaultapps: installdefaultapps
-        }
+        };
     }
 }
 
