@@ -92,6 +92,20 @@ nav {
 	align-items: center;
 	height: fit-content;
 	padding: var(--spacing-normal);
+
+	& #panels {
+    display: flex
+;
+    flex-direction: row;
+    gap: 5px;
+	&>div {
+		
+    height: 33px;
+    overflow: hidden;
+            display: flex
+;
+	}
+}
 }
 
 nav .flodiv {

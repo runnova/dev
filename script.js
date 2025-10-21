@@ -402,7 +402,9 @@ async function openn() {
 		}
 	}
 	gid("appdmod").showModal();
-	document.activeElement.blur()
+	if (isMobile) {
+		gid("appdmod").blur();
+	}
 }
 async function loadrecentapps() {
 	gid("serrecentapps").innerHTML = ``
