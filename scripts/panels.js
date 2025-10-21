@@ -68,6 +68,7 @@ function startPanel(code, params) {
     function safeSetHTML(appid, html) {
         if (!panels[appid]) {
             const container = document.createElement('div');
+            container.setAttribute('uid', winuid);
             const shadow = container.attachShadow({ mode: 'closed' });
             document.getElementById("panels").appendChild(container);
             panels[appid] = shadow;
@@ -134,4 +135,21 @@ function startPanel(code, params) {
     }
 
     return { worker, winuid };
+}
+
+const panelRegistry = [];
+
+function startPanelSafely(code, params) {
+    const { worker, winuid } = startPanel(code, params);
+    panelRegistry.push({ worker, winuid });
+    return { worker, winuid };
+}
+
+function stopAllPanels() {
+    panelRegistry.forEach(({ worker, winuid }) => {
+        worker.terminate();
+        const container = document.getElementById("panels").querySelector(`div[uid='${winuid}']`);
+        if (container) container.remove();
+    });
+    panelRegistry.length = 0;
 }

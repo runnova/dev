@@ -266,6 +266,18 @@ async function startup() {
 
 			try {
 
+				stopAllPanels();
+
+				let panels = await getSetting("navPanels") || [];
+				if (panels.length) {
+					for (let id of panels) {
+						let code = await getFileById(id);
+						let js = atob(code.content.split(',')[1]);
+						startPanelSafely(js);
+					}
+				}
+
+
 				console.log("889")
 				function runScriptsSequentially(scripts, delay) {
 					scripts.forEach((script, index) => {
