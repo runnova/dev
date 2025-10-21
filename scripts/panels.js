@@ -8,7 +8,7 @@ function startPanel(code, params) {
             this.pendingRequests = {};
             this.listeners = {};
             const chunks = {};
-            self.onmessage = (t) => {
+             self.addEventListener("message", (t) => {
                 const { transactionId:s, chunk:n, chunkIndex:i, totalChunks:o, isJson:a, success:d, error:r, type:c, payload:l } = t.data;
                 if (s && typeof d === "boolean") {
                     if (a && n !== undefined) {
@@ -27,7 +27,7 @@ function startPanel(code, params) {
                 } else if (c && l !== undefined && this.listeners[c]) {
                     this.listeners[c].forEach(e => e(l));
                 }
-            };
+});
         }
         generateTransactionId(){ return \`txn_\${Date.now()}_\${this.transactionIdCounter++}\`; }
         send(action, ...params){
@@ -128,7 +128,9 @@ function startPanel(code, params) {
                 const chunk = json.slice(i * chunkSize, (i + 1) * chunkSize);
                 target.postMessage({ transactionId, chunk, chunkIndex: i, totalChunks, isJson: true, success: true });
             }
-        } catch {}
+        } catch (err) {
+            target.postMessage({ transactionId, error: err.message, success: false });
+        }
     }
 
     return { worker, winuid };

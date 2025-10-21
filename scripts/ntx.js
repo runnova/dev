@@ -84,7 +84,7 @@ class NTXSession {
             stringToPastelColor: stringToPastelColor,
             stringToDarkPastelColor: stringToDarkPastelColor,
             toTitleCase: toTitleCase,
-            getRandomNothingQuote: getRandomNothingQuote,
+            getRandomNothingQuote: (getRandomNothingQuote),
             debounce: debounce,
             mtpetxt: mtpetxt,
             calculateSimilarity: calculateSimilarity
