@@ -2465,25 +2465,34 @@
 		}
 
 		async function getMenuItems(target) {
-			if (selectedFiles.length > 1) {
-				return [{ label: "Delete All", action: () => deleteFiles(selectedFiles) }];
-			}
-			if (target.classList.contains('file')) {
-				const itemuid = target.getAttribute("unid");
-				slfileID = itemuid;
-				const file = { unid: itemuid, type: 'app', fileName: await window.parent.getFileNameByID(itemuid) };
-				const actions = Object.values(window.fileActions);
-				const conditions = await Promise.all(actions.map(async (action) => await action.condition(file)));
-				const filteredActions = actions.filter((_, index) => conditions[index]);
-				return filteredActions.map(action => ({
-					icon: action.icon,
-					color: action.color,
-					label: action.label,
-					action: () => action.action(itemuid),
-				}));
-			}
-			return [{ label: 'Inspect', action: () => console.log('Inspect clicked') }];
+	if (selectedFiles.length > 1) {
+		return [{ label: "Delete All", action: () => deleteFiles(selectedFiles) }];
+	}
+	if (target.classList.contains('file')) {
+		const itemuid = target.getAttribute("unid");
+		slfileID = itemuid;
+		const file = { unid: itemuid, type: 'app', fileName: await window.parent.getFileNameByID(itemuid) };
+		const categories = Object.values(window.fileActions);
+		let result = [];
+		for (const group of categories) {
+			const actions = Object.values(group);
+			const conditions = await Promise.all(actions.map(async (action) => await action.condition(file)));
+			const valid = actions.filter((_, i) => conditions[i]);
+			const mapped = valid.map(a => ({
+				icon: a.icon,
+				color: a.color,
+				label: a.label,
+				action: () => a.action(itemuid),
+				special: a.special || false
+			}));
+			result.push(...mapped);
 		}
+		const special = result.filter(a => a.special);
+		const normal = result.filter(a => !a.special);
+		return [...special, ...normal];
+	}
+	return [{ label: 'Inspect', action: () => console.log('Inspect clicked') }];
+}
 
 		var contextMenu;
 

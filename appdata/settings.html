@@ -2277,7 +2277,6 @@
 						if (storedwall) {
 							document.getElementById("wallpaperurl").value = storedwall;
 						} else {
-							console.log("No wallpaper set ", storedwall);
 						}
 
 
@@ -2289,7 +2288,6 @@
 
 						let newValue2 = document.getElementById("wallpaperSiz").value
 						ntxSession.send("settings.set", "wallpaperSiz", newValue2);
-						console.log("alignSETTTTTT")
 					}
 
 					document.addEventListener("DOMContentLoaded", async () => {
@@ -2311,7 +2309,6 @@
 
 
 					async function defs5() {
-						console.log("defs5 loaded");
 
 						// smartsearch
 						document.getElementById("cbx-69").addEventListener("change", async function () {
@@ -2411,7 +2408,6 @@
 							let newValue = document.getElementById("timefrmt").value;
 							ntxSession.send("settings.set", "timefrmt", newValue);
 							ntxSession.send("sysUI.toast", "Reload NovaOS for the changes to take effect.");
-							console.log("timfired")
 						});
 
 						let selinp2 = document.getElementById("defSearchEngine");
@@ -2728,7 +2724,6 @@
 
 				function updateBatteryInfo(battery) {
 					batchar = battery.charging;
-					console.log(batchar)
 					var batteryPercentage = (battery.level * 100).toFixed(0);
 					document.getElementById("batperdisp").innerHTML = batteryPercentage + "%";
 
@@ -3023,7 +3018,6 @@
 						}
 						input.addEventListener("change", async function () {
 							let registrykid = await window.parent.getSetting(appID, "AppRegistry.json");
-							console.log(appID, registrykid, 45)
 
 							if (input.checked) {
 								if (!registrykid.perms.includes(ns)) {
@@ -3492,7 +3486,6 @@
 					try {
 						const text = await navigator.clipboard.readText();
 						const parsedColors = JSON.parse(text);
-						console.log(parsedColors)
 						var variableName;
 
 						if (typeof parsedColors === 'object' && parsedColors !== null) {
@@ -3609,7 +3602,6 @@
 
 						colorsToSave[variableName] = colorValue;
 					});
-					console.log(colorsToSave)
 
 					applyTheme({ colors: colorsToSave });
 					await ntxSession.send("settings.set", "themeColors", colorsToSave);
@@ -3905,12 +3897,14 @@
 					const key = el.getAttribute('settingkey');
 					try {
 						const val = await ntxSession.send("settings.get", key);
-						el.checked = val === true || val === 'true' || val != null;
+						if (val) el.checked = val;
 					} catch (e) {
 						console.error(e);
 					}
 					el.addEventListener('change', () => {
 						ntxSession.send("settings.set", key, el.checked === true);
+						if (window.parent.sessionSettingKeys.includes(key))
+						ntx.sysUI.toast("Refresh homescreen to apply settings")
 					});
 				}
 			});
@@ -3922,7 +3916,6 @@
 			convertTurnonCheckboxes();
 			try {
 				if (myWindow.params) {
-					console.log(myWindow.params.data.id)
 					if (myWindow.params.data.data == "appsets" && myWindow.params.data.id) {
 						loadAppSettings(myWindow.params.data.id);
 					}
@@ -4035,12 +4028,12 @@
 
 			// nav theme
 			async function saveNovNavCtrlSetting() {
-				console.log("#525")
 				let newValue = {
 					"bg": document.getElementById("cbx-71").checked,
 					"align": document.getElementById("navAlignment").value
 				};
-				await ntxSession.send("settings.set", "NovNavCtrl", newValue);
+				ntxSession.send("settings.set", "NovNavCtrl", newValue);
+				ntx.sysUI.toast("Refresh homescreen to apply changes.");
 			}
 
 			document.getElementById("cbx-71").addEventListener("change", saveNovNavCtrlSetting);

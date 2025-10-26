@@ -120,12 +120,6 @@ async function createHeaderControls(winuid, windowDiv) {
     controlsContainer.appendChild(closeButton);
 
     if (!isMobile) {
-        const minimizeButton = createButton("Minimize", "remove", "wincl", "flbtn");
-        minimizeButton.onclick = () => {
-            snappingconthide();
-            minim(winuid);
-        };
-        controlsContainer.appendChild(minimizeButton);
         const maximizeButton = createButton("Maximize", "open_in_full", "wincl", "flbtn");
         maximizeButton.querySelector('span').style.fontSize = '0.7rem';
         maximizeButton.onclick = () => {
@@ -133,6 +127,12 @@ async function createHeaderControls(winuid, windowDiv) {
             flwin(windowDiv);
         };
         controlsContainer.appendChild(maximizeButton);
+        const minimizeButton = createButton("Minimize", "remove", "wincl", "flbtn");
+        minimizeButton.onclick = () => {
+            snappingconthide();
+            minim(winuid);
+        };
+        controlsContainer.appendChild(minimizeButton);
     }
 
     return controlsContainer;

@@ -1644,7 +1644,6 @@ const maxToastDuration = 5000;
 let toastQueue = [];
 
 function toast(text, regref, duration = 5000,) {
-	console.log("Toast: ", duration);
 	let displayDuration = Math.min(duration, maxToastDuration);
 
 	if (toastInProgress) {
@@ -1728,40 +1727,6 @@ function displayNotifications(x) {
 		notifList.appendChild(notifDiv);
 	});
 }
-function runAsOSL(content) {
-	const encodedContent = encodeURIComponent(content).replace(/'/g, "%27").replace(/"/g, "%22");
-	const cont = `<iframe class="oslframe" src="https://origin.mistium.com/Versions/originv5.5.4?embed=${encodedContent}"></iframe>
-	<style>
-		.oslframe {
-			width: 100%;
-			height: 100%;
-			border: none;
-		}
-	</style>`;
-	openwindow("Nova OSL Runner", cont);
-}
-function runAsWasm(content) {
-	const wasmBytes = new Uint8Array(content);
-	const div = document.createElement('div');
-	const script = document.createElement('script');
-	script.innerHTML = `
-		function greenflag() {
-			const memory = new WebAssembly.Memory({ initial: 1 });
-			const imports = { env: { memory: memory } };
-
-			const wasmCode = new Uint8Array([${Array.from(wasmBytes)}]);
-			WebAssembly.instantiate(wasmCode, imports)
-				.then(obj => {
-					console.log(obj.instance.exports.memory);
-					// Additional code to execute the WebAssembly module as needed
-				})
-				.catch(err => console.error(err));
-		}
-	`;
-	div.appendChild(script);
-	openwindow("Nova Wasm Runner", div.innerHTML);
-}
-
 (async () => {
 	let appbarelement = document.getElementById("dock");
 	let dropZone = appbarelement;

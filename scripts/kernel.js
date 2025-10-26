@@ -48,7 +48,6 @@ async function useHandler(name, stufftodo) {
 const iframeReferences = {};
 
 async function openfile(x, stufftodo) {
-    console.log("Opening file:", x, stufftodo);
     let unid = x;
     try {
         if (!unid) {
@@ -68,8 +67,6 @@ async function openfile(x, stufftodo) {
         if (mm.type == "app") {
             // run the app if it is one
             await openapp(mm.fileName, unid, stufftodo);
-        } else if (mm.type == "osl") {
-            runAsOSL(mm.content)
         } else if (mm.type == "lnk") {
             let z = JSON.parse(decodeBase64Content(mm.content));
             openfile(z.open)
@@ -137,10 +134,8 @@ async function buildIframeApiBridge(appid, title, winuid, perms) {
     }
 
     async function handleNtxSessionMessage(event) {
-        console.log('HANDLE NTX INCOMING', event.data)
         const { action, params, transactionId } = event.data;
         const contextID = genUID();
-        console.log(5345, appid)
         notificationContext[contextID] = {
             appID: appid,
             windowID: winuid
@@ -175,7 +170,6 @@ async function buildIframeApiBridge(appid, title, winuid, perms) {
             setTimeout(() => {
                 const loader = document.querySelector(`#window${CSS.escape(winuid)} .windowloader`);
                 if (loader) {
-                    console.log("Loader found, removing it.");
                     loader.classList.add("transp5");
                     setTimeout(() => loader.remove(), 500);
                 }
@@ -377,6 +371,10 @@ async function openapp(appTitle, external, customtodo, headless = false) {
                 if (!AppContent) return;
 
                 external = await createFile("Apps/", toTitleCase(appTitle), "app", AppContent);
+
+                openfile(external);
+                return;
+
             } else {
                 AppContent = await getFileById(external);
                 if (!appTitle) appTitle = AppContent.fileName;
