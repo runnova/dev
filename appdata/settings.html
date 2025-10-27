@@ -3471,6 +3471,7 @@
 					const colorsToCopy = {};
 					document.querySelectorAll('[data-variable]').forEach(button => {
 						const variableName = button.dataset.variable;
+						console.log(button.value)
 						const colorValue = button.jscolor ? button.jscolor.toHEXString() : button.value;
 						colorsToCopy[variableName] = colorValue;
 					});
@@ -3491,20 +3492,24 @@
 						if (typeof parsedColors === 'object' && parsedColors !== null) {
 							const buttons = document.querySelectorAll('[data-variable]');
 							buttons.forEach(button => {
-								const variableName = button.dataset.variable;
-								if (parsedColors[variableName]) {
-									if (button.classList.contains('colorpickerui')) {
-										button.jscolor.fromString(parsedColors[variableName]);
-										updateColor(button, variableName);
-									} else {
-										let value = parsedColors[variableName];
-										if (variableName === '--siz-radius1') {
-											const parsedValue = parseFloat(value);
-											value = normalizeBorderRadius(parsedValue);
+								try {
+									const variableName = button.dataset.variable;
+									if (parsedColors[variableName]) {
+										if (button.classList.contains('colorpickerui')) {
+											button.jscolor.fromString(parsedColors[variableName]);
+											updateColor(button, variableName);
+										} else {
+											let value = parsedColors[variableName];
+											if (variableName === '--siz-radius1') {
+												const parsedValue = parseFloat(value);
+												value = normalizeBorderRadius(parsedValue);
+											}
+											button.value = value;
 										}
-										button.value = value;
+	
 									}
-
+								} catch (error) {
+									
 								}
 							});
 							if (parsedColors['wallpaper']) {
