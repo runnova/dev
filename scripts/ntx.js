@@ -96,6 +96,9 @@ class NTXSession {
             password: password,
             eraseNova: erdbsfull
         };
+        this.os = {
+            getBattery: navGetBattery
+        }
         this.specific = {
             useNovaOffline: useNovaOffline,
             removeSWs: removeSWs,

@@ -302,3 +302,9 @@ function createSafeHTMLRenderer(targetElement) {
     }
   };
 }
+
+async function navGetBattery() {
+  if (!('getBattery' in navigator)) return { supported: false, level: 0, charging: false };
+  const battery = await navigator.getBattery();
+  return { supported: true, level: battery.level, charging: battery.charging };
+}

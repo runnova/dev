@@ -72,6 +72,32 @@ function startPanel(code, params) {
             const shadow = container.attachShadow({ mode: 'closed' });
             document.getElementById("panels").appendChild(container);
             panels[appid] = shadow;
+
+            const fontUrl = 'https://adthoughtsglobal.github.io/resources/MaterialSymbolsRounded.woff2';
+
+            let styleBlock = `
+            <style>
+                @font-face {
+                    font-family: 'Material Symbols Rounded';
+                    font-style: normal;
+                    src: url(${fontUrl}) format('woff2');
+                }
+                .material-symbols-rounded {
+                    font-family: 'Material Symbols Rounded';
+                    font-weight: normal;
+                    font-style: normal;
+                    font-size: 24px;
+                    color: red;
+                    line-height: 1;
+                    display: inline-block;
+                    white-space: nowrap;
+                    direction: ltr;
+                    -webkit-font-smoothing: antialiased;
+                }
+            </style>
+        `;
+
+            shadow.innerHTML = styleBlock;
         }
         const shadow = panels[appid];
         shadow.innerHTML = '';
