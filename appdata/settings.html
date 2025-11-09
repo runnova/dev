@@ -3153,63 +3153,6 @@
 				</small>
 			</segr>
 		</div>
-		<div id="rotursets" class="tabcontent advancedsettab">
-			<h1><span class="material-symbols-rounded advancedsetsbackbtn" onclick="openCity(event, 'network');">
-					arrow_back
-				</span> RoturTW</h1>
-
-
-			<div id="rotursettings">
-				<h1>Account</h1>
-				<segr id="rtrinitspace">
-					<div class="single_setting" class="spread">
-						<b>Initialize rotur</b>
-						<button onclick="loginOnceRotur()">Start</button>
-					</div>
-					<small>RoturTW is a third party service, which offers APIs. NovaOS supports it but isn't affiliated
-						or
-						endorsing. Visit rotur.dev for details.</small>
-				</segr>
-
-				<segr id="rtrsignedinsec" style="display:none;">
-					<div class="single_setting" class="spread">
-						<b id="rtruserstatsi">Signed in</b>
-						<button onclick="signoutrtrsets()">Sign Out</button>
-					</div>
-				</segr>
-				<script>
-					async function loginOnceRotur() {
-						await window.parent.attemptConnection();
-						window.parent.roturExtension.login_prompt({ STYLE_URL: "https://adthoughtsglobal.github.io/nova-dev-repl-rl/libs/roturstyle.css" });
-					}
-					async function signoutrtrsets() {
-						await window.parent.logoutofrtr();
-						loaduprtour()
-					}
-					function loaduprtour() {
-						const roturExtension = window.parent.roturExtension;
-
-						if (roturExtension && roturExtension.loggedIn()) {
-							document.getElementById("rtrinitspace").style.display = "none";
-							document.getElementById("rtrsignedinsec").style.display = "block";
-							document.getElementById("rtruserstatsi").innerText = "Signed in as " + roturExtension.user.username;
-						} else {
-							document.getElementById("rtrinitspace").style.display = "block";
-							document.getElementById("rtrsignedinsec").style.display = "none";
-						}
-					}
-
-					async function initrotur() {
-						let rtrstats = await window.parent.setuprotur();
-
-						document.getElementById("rtrinitspace").style.display = "none";
-					}
-
-				</script>
-
-				</segr>
-			</div>
-		</div>
 
 		<div id="advancedthemesets" class="tabcontent advancedsettab">
 			<h1><span class="material-symbols-rounded advancedsetsbackbtn" onclick="openCity(event, 'exp');">

@@ -386,46 +386,6 @@ class RoturExtension {
   firstLogin() {
     return false;
   }
-
-  login_prompt({ STYLE_URL }) {
-    if (!this.is_connected) { console.error("Not Connected"); return; }
-    if (this.authenticated) { console.error("Already Logged In"); return; }
-
-    const e = document.createElement("iframe");
-    e.id = "rotur-auth";
-    e.src = `https://rotur.dev/auth?system=novaOS&styles=${encodeURIComponent(STYLE_URL)}`;
-    Object.assign(e.style, {
-      width: "70%",
-      height: "80%",
-      border: "none",
-      pointerEvents: "auto",
-      position: "absolute",
-      top: "10%",
-      right: "14.5%",
-      border: "var(--box-crisp)",
-      borderRadius: "1em",
-      zIndex: 999
-    });
-
-    document.body.appendChild(e);
-
-    const _roturAuthHandler = (a) => {
-      console.log("Rotur Auth Message Received", a);
-      if ("https://rotur.dev" === a.origin && "rotur-auth-token" === a.data?.type) {
-        t.remove()
-        window.removeEventListener("message", _roturAuthHandler);
-        this.loginToken({ TOKEN: a.data.token });
-        setSetting("roturLink", JSON.stringify({
-          "type": "token",
-          "token": a.data.token
-        }));
-      }
-    };
-
-    window.addEventListener("message", _roturAuthHandler);
-    return "Auth window opened";
-  }
-
   login() { }
   loginMd5() { }
 
@@ -1710,8 +1670,6 @@ function roturTWEventCall(data) {
         } else if (targettype == "token") {
           await roturExtension.loginToken({ TOKEN: JSON.parse(localroturdata).token })
         }
-      } else {
-        roturExtension.login_prompt({ STYLE_URL: "https://adthoughtsglobal.github.io/nova-dev-repl-rl/libs/roturstyle.css" });
       }
     })();
   }
