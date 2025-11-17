@@ -215,7 +215,6 @@ async function startup() {
 			await genDesktop();
 			closeElementedis();
 
-			let fetchupdatedataver;
 			async function fetchDataAndUpdate() {
 				let fetchupdatedata = await fetch("versions.json");
 				if (fetchupdatedata.ok) {
@@ -223,16 +222,17 @@ async function startup() {
 					let lclver = await getSetting("versions", "defaultApps.json") || {};
 					let howmany = 0;
 					for (let item of Object.keys(fetchupdatedataver)) {
-						let local = lclver[item] || 6754999;
+						let local = lclver[item]?.version || 0;
 						if (local && fetchupdatedataver[item] != local) {
 							initialization = 1;
-							await updateApp(item);
+							let updated = await updateApp(item);
 							initialization = 0;
 							howmany++;
-							lclver[item] = fetchupdatedataver[item];
+							lclver[item] = { version: fetchupdatedataver[item], appid: updated.id };
 						}
 					}
-					await setSetting("versions", lclver, "defaultApps.json")
+					await setSetting("versions", lclver, "defaultApps.json");
+
 					if (howmany) toast(howmany + " default app(s) have been updated")
 				} else {
 					console.error("Failed to fetch data from the server.");
@@ -830,16 +830,14 @@ async function extractAndRegisterCapabilities(appId, content) {
 		}
 
 		onlyDefPerms = (onlyDefPerms) ? true : arraysEqualIgnoreOrder(requestedperms, totalperms);
-		if (onlyDefPerms) {
-			console.log("only def perms");
-		}
 
 		let permissions = Array.from(new Set([...totalperms, ...requestedperms]));
 
 		if (!onlyDefPerms) {
 			let modal = gid("AppInstDia");
 			gid("app_inst_dia_icon").innerHTML = await getAppIcon(0, appId);
-			gid("app_inst_mod_app_name").innerText = await getFileNameByID(appId);
+			let appName = await getFileNameByID(appId);
+			gid("app_inst_mod_app_name").innerText = appName;
 			let listelement = gid("app_inst_mod_li");
 			listelement.innerHTML = '';
 			if (capabilities.length > 0) {
@@ -881,13 +879,16 @@ async function extractAndRegisterCapabilities(appId, content) {
 
 			let yesButton = gid("app_inst_mod_agbtn");
 			let noButton = gid("app_inst_mod_nobtn");
+			let lclver = await getSetting("versions", "defaultApps.json") || {};
+			let defaultappsext = Object.values(lclver).some(a => a.appid === appId);
 
 			let condition = await new Promise((resolve) => {
-				if (initialization) {
-					resolve(true);
-				} else {
-					modal.showModal();
+				if (initialization || defaultappsext) {
+					if (defaultappsext) toast(appName + " Updated");
+					return resolve(true);
 				}
+
+				modal.showModal();
 				yesButton.onclick = () => {
 					modal.close();
 					resolve(true);
@@ -897,6 +898,7 @@ async function extractAndRegisterCapabilities(appId, content) {
 					resolve(false);
 				};
 			});
+
 
 			if (!condition) return;
 		}
@@ -1298,8 +1300,8 @@ async function initializeOS() {
 			throw new Error("Failed to fetch file for " + appName);
 		}
 		const fileContent = await response.text();
-		await createFile("Apps/", toTitleCase(appName), "app", fileContent);
-		return true;
+
+		return await createFile("Apps/", toTitleCase(appName), "app", fileContent);
 	} catch (error) {
 		console.error("Error updating " + appName + ":", error.message);
 		if (attempt < maxRetries) {
@@ -1322,7 +1324,6 @@ async function installdefaultapps() {
 	setTimeout(() => gid("lazarus").classList.add("closeEffect"), 2700);
 	setTimeout(() => gid("lazarus").close(), 3000);
 
-	const maxRetries = 3;
 	const failedApps = [];
 	async function waitForNonNull() {
 		let result = null;
@@ -1347,11 +1348,14 @@ async function installdefaultapps() {
 		for (let i = 0; i < defAppsList.length; i++) {
 			await new Promise(res => setTimeout(res, 300));
 			const appName = defAppsList[i];
-			const appUpdatePromise = updateApp(appName);
-
-			await Promise.race([appUpdatePromise, new Promise(res => setTimeout(res, 3000))]);
+			const updated = await Promise.race([updateApp(appName), new Promise(res => setTimeout(res, 3000))]);
+			if (updated && updated.id) {
+				lclver[appName] = { version: fetchupdatedataver[appName] || 0, appid: updated.id };
+			}
 			setsrtpprgbr(Math.round((i + 1) / defAppsList.length * 100));
 		}
+		await setSetting("versions", lclver, "defaultApps.json");
+
 		clearInterval(interval);
 
 		if (failedApps.length > 0) {
@@ -1360,18 +1364,20 @@ async function installdefaultapps() {
 				const stillFailed = [];
 				for (let i = 0; i < failedApps.length; i++) {
 					const appName = failedApps[i];
-					const success = await updateApp(appName, 1);
-					if (!success) {
+					const updated = await updateApp(appName, 1);
+					if (updated && updated.id) {
+						lclver[appName] = { version: fetchupdatedataver[appName] || 0, appid: updated.id };
+					} else {
 						stillFailed.push(appName);
 					}
 				}
+				await setSetting("versions", lclver, "defaultApps.json");
 				if (stillFailed.length > 0) {
 					console.error("These apps still failed after retry:", stillFailed);
 					await say("Some apps still failed to download: " + stillFailed.join(", "));
 				}
 			}
 		}
-
 		if (!initialization) {
 			closeElementedis();
 		}
