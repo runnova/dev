@@ -2076,7 +2076,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 		"scripts/fflate.js",
 		"scripts/encdec.js",
 		"scripts/kernel.js",
-		"scripts/rotur.js",
 		"scripts/ctxmenu.js",
 		"scripts/edgecases.js",
 		"scripts/dompurify.js",
