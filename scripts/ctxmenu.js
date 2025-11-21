@@ -106,7 +106,9 @@ async function getMenuItems(target) {
 	}
 	if (target.classList.contains('windowheader')) {
 		return [
-			{ icon: 'Close', label: target.parentElement.getAttribute("data-winuid"), action: () => 0}
+			{ icon: 'Close', label: "Close window", action: () => {
+				clwin(target.parentElement.getAttribute("data-winuid"));
+			}}
 		];
 	}
 	return [

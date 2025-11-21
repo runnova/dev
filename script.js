@@ -1345,6 +1345,9 @@ async function installdefaultapps() {
 			gid('startupterms').innerText = hangMessages[randomIndex];
 		}, 2500);
 
+
+		let lclver = await getSetting("versions", "defaultApps.json") || {};
+
 		for (let i = 0; i < defAppsList.length; i++) {
 			await new Promise(res => setTimeout(res, 300));
 			const appName = defAppsList[i];
