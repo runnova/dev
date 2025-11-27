@@ -722,7 +722,10 @@
 
 		#pathdisp span {
 			display: inline-block;
+			white-space: nowrap;
 			opacity: 0.7;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
 		#pathdisp span:hover {
@@ -1945,57 +1948,57 @@
 			return `${size.toFixed(2)} ${units[index]}`;
 		}
 		async function populateFileActions(fileData) {
-	if (sessiontype === "opener") return;
-	const toolsContainer = document.getElementById("filetools");
-	const moreToolsContainer = document.getElementById("moretoolsdropdwn");
-	toolsContainer.innerHTML = "";
-	moreToolsContainer.innerHTML = "";
-	const contentDiv = document.createElement("div");
-	contentDiv.className = "dropup-content";
-	toolsContainer.appendChild(contentDiv);
-	if (selectedFiles.length > 1) {
-		const deleteAll = document.createElement("a");
-		deleteAll.className = "dropdownerthebob";
-		deleteAll.innerHTML = `<span class="material-symbols-rounded" style="color:#ffb3ba;">delete</span> <b>Delete All</b>`;
-		deleteAll.onclick = () => deleteFiles(selectedFiles);
-		contentDiv.appendChild(deleteAll);
-		document.getElementById("fileinfobn").innerHTML = "Selected " + selectedFiles.length + " files";
-		return;
-	}
-	for (const [groupName, group] of Object.entries(fileActions)) {
-		for (const action of Object.values(group)) {
-			if (action.special && await action.condition(fileData)) {
-				const option = document.createElement("a");
-				option.classList.add("dropdownerthebob");
-				option.title = action.label;
-				option.onclick = () => action.action(fileData.id);
-				option.innerHTML = `<span class="material-symbols-rounded" style="color:${action.icon_color};">${action.icon}</span> <b>${action.label}</b>`;
-				contentDiv.appendChild(option);
+			if (sessiontype === "opener") return;
+			const toolsContainer = document.getElementById("filetools");
+			const moreToolsContainer = document.getElementById("moretoolsdropdwn");
+			toolsContainer.innerHTML = "";
+			moreToolsContainer.innerHTML = "";
+			const contentDiv = document.createElement("div");
+			contentDiv.className = "dropup-content";
+			toolsContainer.appendChild(contentDiv);
+			if (selectedFiles.length > 1) {
+				const deleteAll = document.createElement("a");
+				deleteAll.className = "dropdownerthebob";
+				deleteAll.innerHTML = `<span class="material-symbols-rounded" style="color:#ffb3ba;">delete</span> <b>Delete All</b>`;
+				deleteAll.onclick = () => deleteFiles(selectedFiles);
+				contentDiv.appendChild(deleteAll);
+				document.getElementById("fileinfobn").innerHTML = "Selected " + selectedFiles.length + " files";
+				return;
+			}
+			for (const [groupName, group] of Object.entries(fileActions)) {
+				for (const action of Object.values(group)) {
+					if (action.special && await action.condition(fileData)) {
+						const option = document.createElement("a");
+						option.classList.add("dropdownerthebob");
+						option.title = action.label;
+						option.onclick = () => action.action(fileData.id);
+						option.innerHTML = `<span class="material-symbols-rounded" style="color:${action.icon_color};">${action.icon}</span> <b>${action.label}</b>`;
+						contentDiv.appendChild(option);
+					}
+				}
+			}
+			for (const [groupName, group] of Object.entries(fileActions)) {
+				const groupActions = Object.values(group).filter(a => !a.special);
+				if (!groupActions.length) continue;
+				const groupToggle = document.createElement("a");
+				groupToggle.classList.add("dropdownerthebob");
+				groupToggle.innerHTML = `<span class="material-symbols-rounded droptglbtn">expand_more</span> <b>${groupName}</b>`;
+				const groupMenu = document.createElement("div");
+				groupMenu.className = "dropup-content nested";
+				groupToggle.appendChild(groupMenu);
+				contentDiv.appendChild(groupToggle);
+				for (const action of groupActions) {
+					if (await action.condition(fileData)) {
+						const option = document.createElement("a");
+						option.classList.add("dropdownerthebob");
+						option.title = action.label;
+						option.onclick = () => action.action(fileData.id);
+						option.innerHTML = `<span class="material-symbols-rounded" style="color:${action.icon_color};">${action.icon}</span> <b>${action.label}</b>`;
+						groupMenu.appendChild(option);
+					}
+				}
 			}
 		}
-	}
-	for (const [groupName, group] of Object.entries(fileActions)) {
-		const groupActions = Object.values(group).filter(a => !a.special);
-		if (!groupActions.length) continue;
-		const groupToggle = document.createElement("a");
-		groupToggle.classList.add("dropdownerthebob");
-		groupToggle.innerHTML = `<span class="material-symbols-rounded droptglbtn">expand_more</span> <b>${groupName}</b>`;
-		const groupMenu = document.createElement("div");
-		groupMenu.className = "dropup-content nested";
-		groupToggle.appendChild(groupMenu);
-		contentDiv.appendChild(groupToggle);
-		for (const action of groupActions) {
-			if (await action.condition(fileData)) {
-				const option = document.createElement("a");
-				option.classList.add("dropdownerthebob");
-				option.title = action.label;
-				option.onclick = () => action.action(fileData.id);
-				option.innerHTML = `<span class="material-symbols-rounded" style="color:${action.icon_color};">${action.icon}</span> <b>${action.label}</b>`;
-				groupMenu.appendChild(option);
-			}
-		}
-	}
-}
 
 
 		var isitBulkRemfile = false;
@@ -2455,7 +2458,7 @@
 					label: 'Unzip',
 					action: async (itemuid) => {
 						let file = await ntxSession.send("fileGet.byId", itemuid)
-						let toBeSavedToData = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'directory'});
+						let toBeSavedToData = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'directory' });
 						await window.parent.unzipToFolder(toBeSavedToData + file.fileName, file.content);
 					},
 					condition: (file) => getFileExtension(file.fileName) == "zip",
@@ -2465,34 +2468,34 @@
 		}
 
 		async function getMenuItems(target) {
-	if (selectedFiles.length > 1) {
-		return [{ label: "Delete All", action: () => deleteFiles(selectedFiles) }];
-	}
-	if (target.classList.contains('file')) {
-		const itemuid = target.getAttribute("unid");
-		slfileID = itemuid;
-		const file = { unid: itemuid, type: 'app', fileName: await window.parent.getFileNameByID(itemuid) };
-		const categories = Object.values(window.fileActions);
-		let result = [];
-		for (const group of categories) {
-			const actions = Object.values(group);
-			const conditions = await Promise.all(actions.map(async (action) => await action.condition(file)));
-			const valid = actions.filter((_, i) => conditions[i]);
-			const mapped = valid.map(a => ({
-				icon: a.icon,
-				color: a.color,
-				label: a.label,
-				action: () => a.action(itemuid),
-				special: a.special || false
-			}));
-			result.push(...mapped);
+			if (selectedFiles.length > 1) {
+				return [{ label: "Delete All", action: () => deleteFiles(selectedFiles) }];
+			}
+			if (target.classList.contains('file')) {
+				const itemuid = target.getAttribute("unid");
+				slfileID = itemuid;
+				const file = { unid: itemuid, type: 'app', fileName: await window.parent.getFileNameByID(itemuid) };
+				const categories = Object.values(window.fileActions);
+				let result = [];
+				for (const group of categories) {
+					const actions = Object.values(group);
+					const conditions = await Promise.all(actions.map(async (action) => await action.condition(file)));
+					const valid = actions.filter((_, i) => conditions[i]);
+					const mapped = valid.map(a => ({
+						icon: a.icon,
+						color: a.color,
+						label: a.label,
+						action: () => a.action(itemuid),
+						special: a.special || false
+					}));
+					result.push(...mapped);
+				}
+				const special = result.filter(a => a.special);
+				const normal = result.filter(a => !a.special);
+				return [...special, ...normal];
+			}
+			return [{ label: 'Inspect', action: () => console.log('Inspect clicked') }];
 		}
-		const special = result.filter(a => a.special);
-		const normal = result.filter(a => !a.special);
-		return [...special, ...normal];
-	}
-	return [{ label: 'Inspect', action: () => console.log('Inspect clicked') }];
-}
 
 		var contextMenu;
 

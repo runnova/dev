@@ -664,30 +664,41 @@ var appStorage = {
 }
 
 // memory management
-
-async function zipFolder(folderPath) {
-  const fileNames = await getFileNamesByFolder(folderPath)
-  const files = {}
-  for (const name of fileNames) {
-    const { content } = await getFileById(name.id, 'content')
-    const base64 = content.split(',')[1]
-    files[name.name] = fflate.strToU8(atob(base64))
-  }
-  const zipped = fflate.zipSync(files)
-  return zipped
+async function zipFolder(path) {
+    const list = await getFileNamesByFolder(path)
+    const tree = {}
+    for (const f of list) {
+        const { content } = await getFileById(f.id, 'content')
+        const base64 = content.split(',')[1]
+        const bin = fflate.strToU8(atob(base64))
+        const parts = f.name.split('/')
+        let node = tree
+        for (let i = 0; i < parts.length - 1; i++) {
+            if (!node[parts[i]]) node[parts[i]] = {}
+            node = node[parts[i]]
+        }
+        node[parts[parts.length - 1]] = bin
+    }
+    return fflate.zipSync(tree)
 }
 
-async function unzipToFolder(folderPath, zipUri) {
-  const base64 = zipUri.split(',')[1]
-  const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0))
-  const files = fflate.unzipSync(bytes)
-  for (const name in files) {
-    const bin = files[name]
-    let binary = ''
-    for (let i = 0; i < bin.length; i++) binary += String.fromCharCode(bin[i])
-    const content = 'data:application/octet-stream;base64,' + btoa(binary)
-    await createFile(folderPath, name, 0, content, {})
-  }
+async function unzipToFolder(path, zipUri) {
+    const base64 = zipUri.split(',')[1]
+    const bytes = Uint8Array.from(atob(base64), x => x.charCodeAt(0))
+    const files = fflate.unzipSync(bytes)
+    for (const key in files) {
+        const bin = files[key]
+        let s = ''
+        for (let i = 0; i < bin.length; i++) s += String.fromCharCode(bin[i])
+        const content = 'data:application/octet-stream;base64,' + btoa(s)
+        const parts = key.split('/')
+        let p = path
+        for (let i = 0; i < parts.length - 1; i++) {
+            await createFolder(p, parts[i])
+            p = p + '/' + parts[i]
+        }
+        await createFile(p, parts[parts.length - 1], 0, content, {})
+    }
 }
 
 async function getFileNamesByFolder(folderPath) {

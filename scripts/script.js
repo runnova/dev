@@ -2078,7 +2078,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 		"scripts/kernel.js",
 		"scripts/ctxmenu.js",
 		"scripts/edgecases.js",
-		"scripts/dompurify.js",
 		"scripts/scripties.js",
 		"scripts/windman.js",
 		"scripts/panels.js",
