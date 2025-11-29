@@ -340,42 +340,22 @@ function runWorker(type, content, key) {
         worker.postMessage({ type, content, key }, transferables);
     });
 }
-
-async function getFileContents(id) {
+async function setFileContents(id, dataUri) {
     if (!dbCache) dbCache = await openDB(CurrentUsername, 1);
     if (!cryptoKeyCache) cryptoKeyCache = await getKey(password);
 
-    const transaction = dbCache.transaction('contentpool', 'readonly');
-    const store = transaction.objectStore('contentpool');
-    const request = store.get(id);
+    // Parse data URI
+    const match = dataUri.match(/^data:(.*);base64,(.*)$/);
+    if (!match) throw new Error('Invalid data URI');
+    const mime = match[1];
+    const base64 = match[2];
 
-    return new Promise((resolve, reject) => {
-        request.onsuccess = async () => {
-            if (request.result) {
-                const { value } = request.result;
-                try {
-                    const result = await runWorker('decrypt', value, cryptoKeyCache);
-                    resolve(result);
-                } catch (error) {
-                    reject(error);
-                }
-            } else {
-                reject(new Error('File not found'));
-            }
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
+    const uint8 = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+    const encrypted = await runWorker('encrypt', uint8, cryptoKeyCache);
 
-async function setFileContents(id, content) {
-    if (!dbCache) dbCache = await openDB(CurrentUsername, 1);
-    if (!cryptoKeyCache) cryptoKeyCache = await getKey(password);
-
-    const dataToStore = await runWorker('encrypt', content, cryptoKeyCache);
-
-    const transaction = dbCache.transaction('contentpool', 'readwrite');
-    const store = transaction.objectStore('contentpool');
-    const request = store.put({ key: id, value: dataToStore });
+    const tx = dbCache.transaction('contentpool', 'readwrite');
+    const store = tx.objectStore('contentpool');
+    const request = store.put({ key: id, value: encrypted, type: mime });
 
     return new Promise((resolve, reject) => {
         request.onsuccess = resolve;
@@ -383,13 +363,34 @@ async function setFileContents(id, content) {
     });
 }
 
+async function getFileContents(id) {
+    if (!dbCache) dbCache = await openDB(CurrentUsername, 1);
+    if (!cryptoKeyCache) cryptoKeyCache = await getKey(password);
+
+    const tx = dbCache.transaction('contentpool', 'readonly');
+    const store = tx.objectStore('contentpool');
+    const request = store.get(id);
+
+    return new Promise((resolve, reject) => {
+        request.onsuccess = async () => {
+            if (!request.result) return reject(new Error('File not found'));
+            try {
+                const decrypted = await runWorker('decrypt', request.result.value, cryptoKeyCache);
+                const base64 = btoa(String.fromCharCode(...new Uint8Array(decrypted)));
+                resolve(`data:${request.result.type};base64,${base64}`);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
 async function removeFileContents(id) {
     if (!dbCache) dbCache = await openDB(CurrentUsername, 1);
-
-    const transaction = dbCache.transaction('contentpool', 'readwrite');
-    const store = transaction.objectStore('contentpool');
+    const tx = dbCache.transaction('contentpool', 'readwrite');
+    const store = tx.objectStore('contentpool');
     const request = store.delete(id);
-
     return new Promise((resolve, reject) => {
         request.onsuccess = resolve;
         request.onerror = () => reject(request.error);
@@ -397,27 +398,7 @@ async function removeFileContents(id) {
 }
 
 const ctntMgr = {
-    async get(id) {
-        try {
-            return await enqueueRequest(getFileContents, [id]);
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    async set(id, content) {
-        try {
-            return await enqueueRequest(setFileContents, [id, content]);
-        } catch (error) {
-            throw error;
-        }
-    },
-
-    async remove(id) {
-        try {
-            return await enqueueRequest(removeFileContents, [id]);
-        } catch (error) {
-            throw error;
-        }
-    }
+    get(id) { return enqueueRequest(getFileContents, [id]); },
+    set(id, dataUri) { return enqueueRequest(setFileContents, [id, dataUri]); },
+    remove(id) { return enqueueRequest(removeFileContents, [id]); }
 };
