@@ -795,129 +795,114 @@ async function extractAndRegisterCapabilities(appId, content) {
 			content = await getFileById(appId);
 			content = content.content;
 		}
-		if (isBase64(content)) {
-			content = decodeBase64Content(content);
-		}
+		if (isBase64(content)) content = decodeBase64Content(content);
+
 		let parser = new DOMParser();
 		let doc = parser.parseFromString(content, "text/html");
-
-		let metaTag = doc.querySelector('meta[name="capabilities"]');
-		let capabilities = [];
-		if (metaTag) {
-			capabilities = metaTag.getAttribute("content").split(',').map(s => s.trim());
-		} else {
-			console.log(`No capabilities: ${appId}`);
-		}
-		let onlyDefPerms = false;
+		let setup = doc.querySelector('script[for="ntxSetup"][type="application/json"]');
+		let cfg = setup ? JSON.parse(setup.textContent) : {};
+		let capabilities = cfg.capabilities || [];
+		let requestedperms = cfg.permissions || [];
+		let novainclude = cfg["nova-include"] || [];
 		let totalperms = ['utility', 'sysUI'];
-		let metaTag2 = doc.querySelector('meta[name="permissions"]');
-		let requestedperms = [];
-		if (metaTag2) {
-			requestedperms = metaTag2.getAttribute("content").split(',').map(s => s.trim());
-		} else {
-			console.log(`No permissions: ${appId}`);
-			onlyDefPerms = true
+
+		let appName = await getFileNameByID(appId);
+		let appAuthor = cfg.author;
+		if (!appAuthor) {
+			say("Failed to install application: application lacks an author", "failed");
+			return;
 		}
 
-		function arraysEqualIgnoreOrder(arr1, arr2) {
-			if (arr1.length !== arr2.length) return false;
-			let sorted1 = [...arr1].sort();
-			let sorted2 = [...arr2].sort();
-			for (let i = 0; i < sorted1.length; i++) {
-				if (sorted1[i] !== sorted2[i]) return false;
-			}
+		let appTag = appName + '@' + appAuthor;
+
+		function arraysEqualIgnoreOrder(a, b) {
+			if (a.length !== b.length) return false;
+			let s1 = [...a].sort();
+			let s2 = [...b].sort();
+			for (let i = 0; i < s1.length; i++) if (s1[i] !== s2[i]) return false;
 			return true;
 		}
 
-		onlyDefPerms = (onlyDefPerms) ? true : arraysEqualIgnoreOrder(requestedperms, totalperms);
-
+		let onlyDefPerms = requestedperms.length === 0 || arraysEqualIgnoreOrder(requestedperms, totalperms);
 		let permissions = Array.from(new Set([...totalperms, ...requestedperms]));
 
 		if (!onlyDefPerms) {
 			let modal = gid("AppInstDia");
 			gid("app_inst_dia_icon").innerHTML = await getAppIcon(0, appId);
-			let appName = await getFileNameByID(appId);
 			gid("app_inst_mod_app_name").innerText = appName;
-			let listelement = gid("app_inst_mod_li");
-			listelement.innerHTML = '';
+			let list = gid("app_inst_mod_li");
+			list.innerHTML = '';
+
 			if (capabilities.length > 0) {
 				let handlerList = capabilities.filter(c => !c.startsWith('.') && c !== 'onStartup').join(', ');
 				if (handlerList) {
-					let span = document.createElement("li");
-					span.innerHTML = `Function as ${handlerList}`;
-					listelement.appendChild(span);
+					let li = document.createElement("li");
+					li.innerHTML = `Function as ${handlerList}`;
+					list.appendChild(li);
 				}
-
 				let fileTypes = capabilities.filter(c => c.startsWith('.')).join(', ');
 				if (fileTypes) {
-					let span = document.createElement("li");
-					span.innerHTML = `Open ${fileTypes} by default`;
-					listelement.appendChild(span);
+					let li = document.createElement("li");
+					li.innerHTML = `Open ${fileTypes} by default`;
+					list.appendChild(li);
 				}
-
 				if (capabilities.includes('onStartup')) {
-					let span = document.createElement("li");
-					span.innerHTML = "Run during startup";
-					listelement.appendChild(span);
+					let li = document.createElement("li");
+					li.innerHTML = "Run during startup";
+					list.appendChild(li);
 				}
 			}
 
 			permissions.sort((a, b) => getNamespaceRisk(b) - getNamespaceRisk(a));
-
 			if (permissions.includes("unsandboxed")) {
-				let span = document.createElement("li");
-				span.innerHTML = describeNamespaces("unsandboxed").replace(/^./, c => c.toUpperCase());
-				span.innerHTML += `<small>Only recommended for apps you trust.</small>`;
-				listelement.appendChild(span);
+				let li = document.createElement("li");
+				li.innerHTML = describeNamespaces("unsandboxed").replace(/^./, c => c.toUpperCase()) + `<small>Only recommended for apps you trust.</small>`;
+				list.appendChild(li);
 			} else {
-				permissions.forEach((perm) => {
-					let span = document.createElement("li");
-					span.innerHTML = describeNamespaces(perm).replace(/^./, c => c.toUpperCase());
-					listelement.appendChild(span);
+				permissions.forEach(p => {
+					let li = document.createElement("li");
+					li.innerHTML = describeNamespaces(p).replace(/^./, c => c.toUpperCase());
+					list.appendChild(li);
 				});
 			}
 
-			let yesButton = gid("app_inst_mod_agbtn");
-			let noButton = gid("app_inst_mod_nobtn");
+			let yes = gid("app_inst_mod_agbtn");
+			let no = gid("app_inst_mod_nobtn");
 			let lclver = await getSetting("versions", "defaultApps.json") || {};
 			let defaultappsext = Object.values(lclver).some(a => a.appid === appId);
 
-			let condition = await new Promise((resolve) => {
+			let condition = await new Promise(resolve => {
 				if (initialization || defaultappsext) {
 					if (defaultappsext) toast(appName + " Updated");
 					return resolve(true);
 				}
-
 				modal.showModal();
-				yesButton.onclick = () => {
+				yes.onclick = () => {
 					modal.close();
 					resolve(true);
 				};
-				noButton.onclick = () => {
+				no.onclick = () => {
 					modal.close();
 					resolve(false);
 				};
 			});
-
-
 			if (!condition) return;
 		}
 
-		requestedperms.forEach((perm) => {
-			if (!totalperms.includes(perm)) {
-				totalperms.push(perm);
-			}
+		requestedperms.forEach(p => {
+			if (!totalperms.includes(p)) totalperms.push(p);
 		});
-		await registerApp(appId, capabilities);
 
+		await registerApp(appId, capabilities);
 		let registry = {};
 		registry.perms = totalperms;
+		registry.tag = appTag;
 		await setSetting(appId, registry, "AppRegistry.json");
-
-	} catch (error) {
-		console.error("Error extracting and registering capabilities:", error);
+	} catch (e) {
+		console.error("Error extracting and registering capabilities:", e);
 	}
 }
+
 async function registerApp(appId, capabilities) {
 	for (let rawCapability of capabilities) {
 		let capability = rawCapability.trim();
