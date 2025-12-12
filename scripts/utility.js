@@ -6,14 +6,14 @@ function timeAgo(ms) {
 		day = Math.floor(hr / 24),
 		mo = Math.floor(day / 30),
 		yr = Math.floor(day / 365);
-	
+
 	return sec < 60 ? `${sec} second${sec === 1 ? '' : 's'} ago` :
-	       min < 60 ? `${min} minute${min === 1 ? '' : 's'} ago` :
-	       hr < 24 ? `${hr} hour${hr === 1 ? '' : 's'} ago` :
-	       day < 30 ? `${day} day${day === 1 ? '' : 's'} ago` :
-	       mo < 12 ? `${mo} month${mo === 1 ? '' : 's'} ago` :
-	       yr === 1 ? `a year ago` :
-	       `${yr} years ago`;
+		min < 60 ? `${min} minute${min === 1 ? '' : 's'} ago` :
+			hr < 24 ? `${hr} hour${hr === 1 ? '' : 's'} ago` :
+				day < 30 ? `${day} day${day === 1 ? '' : 's'} ago` :
+					mo < 12 ? `${mo} month${mo === 1 ? '' : 's'} ago` :
+						yr === 1 ? `a year ago` :
+							`${yr} years ago`;
 }
 
 function genUID() {
@@ -150,41 +150,41 @@ function stringToPastelColor(str) {
 	if (!str) {
 		return `rgb(255,255,255)`;
 	}
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    
-    const r = (hash >> 24) & 0xFF;
-    const g = (hash >> 16) & 0xFF;
-    const b = (hash >> 8) & 0xFF;
-    
-    
-    const pastelR = Math.min(255, r + 100);
-    const pastelG = Math.min(255, g + 100);
-    const pastelB = Math.min(255, b + 100);
-    
-    return `rgb(${pastelR}, ${pastelG}, ${pastelB})`;
-  }
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
 
-  function stringToDarkPastelColor(str) {
+	const r = (hash >> 24) & 0xFF;
+	const g = (hash >> 16) & 0xFF;
+	const b = (hash >> 8) & 0xFF;
+
+
+	const pastelR = Math.min(255, r + 100);
+	const pastelG = Math.min(255, g + 100);
+	const pastelB = Math.min(255, b + 100);
+
+	return `rgb(${pastelR}, ${pastelG}, ${pastelB})`;
+}
+
+function stringToDarkPastelColor(str) {
 	if (!str) {
 		return `rgb(50,50,50)`;
 	}
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    
-    const r = (hash >> 24) & 0xFF;
-    const g = (hash >> 16) & 0xFF;
-    const b = (hash >> 8) & 0xFF;
-    
-    const darkPastelR = Math.max(50, r - 100);
-    const darkPastelG = Math.max(50, g - 100);
-    const darkPastelB = Math.max(50, b - 100);
-    
-    return `rgb(${darkPastelR}, ${darkPastelG}, ${darkPastelB})`;
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
+
+	const r = (hash >> 24) & 0xFF;
+	const g = (hash >> 16) & 0xFF;
+	const b = (hash >> 8) & 0xFF;
+
+	const darkPastelR = Math.max(50, r - 100);
+	const darkPastelG = Math.max(50, g - 100);
+	const darkPastelB = Math.max(50, b - 100);
+
+	return `rgb(${darkPastelR}, ${darkPastelG}, ${darkPastelB})`;
 }
 
 function ptypext(str) {
@@ -192,7 +192,7 @@ function ptypext(str) {
 }
 
 function toTitleCase(str) {
-    return str.replace(/\w\S*/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+	return str.replace(/\w\S*/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 }
 
 function ercache() {
@@ -216,10 +216,10 @@ function getRandomNothingQuote() {
 
 var sysLogHeading;
 function sysLog(heading, description) {
-	if (sysLogHeading == heading){
-		rllog(`%c.%c${description}`,'background:: '+stringToDarkPastelColor(heading)+'; color: '+stringToDarkPastelColor(heading)+'; font-weight:bolder; padding:0 4px; margin-right: .5rem; border-radius: .5rem;','color: grey;',);
+	if (sysLogHeading == heading) {
+		rllog(`%c.%c${description}`, 'background:: ' + stringToDarkPastelColor(heading) + '; color: ' + stringToDarkPastelColor(heading) + '; font-weight:bolder; padding:0 4px; margin-right: .5rem; border-radius: .5rem;', 'color: grey;',);
 	} else {
-		rllog(`%c${heading}%c${description}`,'color: white; background:: '+stringToDarkPastelColor(heading)+'; font-size: 0.5rem; padding: .2rem .6rem; margin-right: .5rem; border-radius: .5rem;','color: grey;',);
+		rllog(`%c${heading}%c${description}`, 'color: white; background:: ' + stringToDarkPastelColor(heading) + '; font-size: 0.5rem; padding: .2rem .6rem; margin-right: .5rem; border-radius: .5rem;', 'color: grey;',);
 	}
 	sysLogHeading = heading;
 }
@@ -227,41 +227,41 @@ function sysLog(heading, description) {
 const rllog = console.log;
 console.log = function (...args) {
 	try {
-	sysLogHeading = null;
-	const stack = new Error().stack;
-	const caller = stack.split('\n')[2].trim();
-	const match = caller.match(/at (\S+)/);
-	const source = match ? (match[1].startsWith('http') ? 'system' : match[1]) : 'anonymous';
-	const style = 'font-size: 0.8em; color:grey;';
-	rllog(`%c${source}\n`, style, ...args);
-	} catch {}
+		sysLogHeading = null;
+		const stack = new Error().stack;
+		const caller = stack.split('\n')[2].trim();
+		const match = caller.match(/at (\S+)/);
+		const source = match ? (match[1].startsWith('http') ? 'system' : match[1]) : 'anonymous';
+		const style = 'font-size: 0.8em; color:grey;';
+		rllog(`%c${source}\n`, style, ...args);
+	} catch { }
 };
 
 const debounceMap = new Map();
 
 function debounce(func, delay = 300) {
-    return function (...args) {
-        const key = func.name;
+	return function (...args) {
+		const key = func.name;
 
-        if (debounceMap.has(key)) {
-            clearTimeout(debounceMap.get(key).timeout);
-        }
+		if (debounceMap.has(key)) {
+			clearTimeout(debounceMap.get(key).timeout);
+		}
 
-        let resolvePromise;
-        const promise = new Promise((resolve) => {
-            resolvePromise = resolve;
-        });
+		let resolvePromise;
+		const promise = new Promise((resolve) => {
+			resolvePromise = resolve;
+		});
 
-        const timeout = setTimeout(async () => {
-            debounceMap.delete(key);
-            const result = await func(...args);
-            resolvePromise(result);
-        }, delay);
+		const timeout = setTimeout(async () => {
+			debounceMap.delete(key);
+			const result = await func(...args);
+			resolvePromise(result);
+		}, delay);
 
-        debounceMap.set(key, { timeout, promise });
+		debounceMap.set(key, { timeout, promise });
 
-        return promise;
-    };
+		return promise;
+	};
 }
 function createBlobFromBase64(base64Data, mimeType) {
 	let byteString = atob(base64Data.split(',')[1]);
@@ -280,31 +280,36 @@ function insertSVG(svgString, targetElement) {
 	targetElement.appendChild(svgDoc);
 }
 function createSafeHTMLRenderer(targetElement) {
-  const host = document.createElement('div');
-  const shadow = host.attachShadow({ mode: 'closed' });
-  targetElement.appendChild(host);
+	const host = document.createElement('div');
+	const shadow = host.attachShadow({ mode: 'closed' });
+	targetElement.appendChild(host);
 
-  return {
-    render(html) {
-      const cleanNode = DOMPurify.sanitize(html, {
-        ALLOWED_TAGS: ['style', 'div', 'p', 'span', 'b', 'i', 'u', 'ul', 'ol', 'li', 'a', 'br', 'input', 'button', 'img', 'code', 'pre', 'h1', 'h2', 'h3', 'blockquote', 'select'],
-        ALLOWED_ATTR: ['href', 'title', 'alt', 'target'],
-        ALLOW_UNKNOWN_PROTOCOLS: false,
-        FORCE_BODY: true,
-        RETURN_DOM: true,
-        RETURN_DOM_FRAGMENT: true
-      });
-      shadow.innerHTML = '';
-      shadow.appendChild(cleanNode);
-    },
-    clear() {
-      shadow.innerHTML = '';
-    }
-  };
+	return {
+		render(html) {
+			const cleanNode = DOMPurify.sanitize(html, {
+				ALLOWED_TAGS: ['style', 'div', 'p', 'span', 'b', 'i', 'u', 'ul', 'ol', 'li', 'a', 'br', 'input', 'button', 'img', 'code', 'pre', 'h1', 'h2', 'h3', 'blockquote', 'select'],
+				ALLOWED_ATTR: ['href', 'title', 'alt', 'target'],
+				ALLOW_UNKNOWN_PROTOCOLS: false,
+				FORCE_BODY: true,
+				RETURN_DOM: true,
+				RETURN_DOM_FRAGMENT: true
+			});
+			shadow.innerHTML = '';
+			shadow.appendChild(cleanNode);
+		},
+		clear() {
+			shadow.innerHTML = '';
+		}
+	};
 }
 
 async function navGetBattery() {
-  if (!('getBattery' in navigator)) return { supported: false, level: 0, charging: false };
-  const battery = await navigator.getBattery();
-  return { supported: true, level: battery.level, charging: battery.charging };
+	if (!('getBattery' in navigator)) return { supported: false, level: 0, charging: false };
+	const battery = await navigator.getBattery();
+	return { supported: true, level: battery.level, charging: battery.charging };
+}
+
+
+function getapnme(x) {
+	return x.split(".")[0];
 }

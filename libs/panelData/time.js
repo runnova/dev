@@ -1,6 +1,16 @@
 greenflag = function () {
   ntx.panel.setHTML(`<div class="hello"><span class="time-display">...</span>
-								<span class="date-display"style="font-size:11px;"></span></div><style>.hello{align-items:center;justify-content:center; display:flex;font-size:13px;flex-direction:column;}</style>`);
+								<span class="date-display"style="font-size:11px;"></span></div>
+                <style>
+                .hello{
+                align-items:center;
+                justify-content:center; 
+                display:flex;
+                font-size:13px;
+                padding: 0 5px;
+                flex-direction:column;
+                }
+                </style>`);
   async function update() {
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

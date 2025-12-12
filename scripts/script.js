@@ -364,10 +364,6 @@ async function openn() {
 				insertSVG(appIcon, iconSpan);
 			});
 
-			function getapnme(x) {
-				return x.split(".")[0];
-			}
-
 			var nameSpan = document.createElement("span");
 			nameSpan.className = "appname";
 			nameSpan.textContent = getapnme(app.name);
@@ -806,12 +802,12 @@ async function extractAndRegisterCapabilities(appId, content) {
 		let novainclude = cfg["nova-include"] || [];
 		let totalperms = ['utility', 'sysUI'];
 
-		let appName = await getFileNameByID(appId);
+		let appName = getapnme(await getFileNameByID(appId));
 		let appAuthor = cfg.author;
-		if (!appAuthor) {
-			say("Failed to install application: application lacks an author", "failed");
-			return;
-		}
+		// if (!appAuthor) {
+		// 	say("Failed to install application: application lacks an author", "failed");
+		// 	return;
+		// }
 
 		let appTag = appName + '@' + appAuthor;
 
@@ -833,22 +829,24 @@ async function extractAndRegisterCapabilities(appId, content) {
 			let list = gid("app_inst_mod_li");
 			list.innerHTML = '';
 
-			if (capabilities.length > 0) {
-				let handlerList = capabilities.filter(c => !c.startsWith('.') && c !== 'onStartup').join(', ');
-				if (handlerList) {
-					let li = document.createElement("li");
-					li.innerHTML = `Function as ${handlerList}`;
+			if (capabilities.length) {
+				const handlers = capabilities.filter(c => c[0] !== '.' && c !== 'onStartup').join(', ');
+				if (handlers) {
+					const li = document.createElement('li');
+					li.innerHTML = `Function as ${handlers}`;
 					list.appendChild(li);
 				}
-				let fileTypes = capabilities.filter(c => c.startsWith('.')).join(', ');
-				if (fileTypes) {
-					let li = document.createElement("li");
-					li.innerHTML = `Open ${fileTypes} by default`;
+
+				const types = capabilities.filter(c => c[0] === '.').join(', ');
+				if (types) {
+					const li = document.createElement('li');
+					li.innerHTML = `Open ${types} by default`;
 					list.appendChild(li);
 				}
+
 				if (capabilities.includes('onStartup')) {
-					let li = document.createElement("li");
-					li.innerHTML = "Run during startup";
+					const li = document.createElement('li');
+					li.innerHTML = 'Run during startup';
 					list.appendChild(li);
 				}
 			}
@@ -981,40 +979,49 @@ function makedialogclosable(ok) {
 		}
 	});
 }
-function openModal(type, { title = '', message, options = null, status = null, preset = '' } = {}, registerRef = false) {
-	if (badlaunch) { return }
-	return new Promise((resolve) => {
+let _activeModalKey = null;
+let _activeModalPromise = null;
+let _activeModalResolvers = [];
+
+function openModal(type, params = {}, registerRef = false) {
+	if (badlaunch) return;
+	const key = JSON.stringify([type, params, registerRef]);
+
+	if (key === _activeModalKey && _activeModalPromise) {
+		return new Promise(r => _activeModalResolvers.push(r));
+	}
+
+	_activeModalKey = key;
+	_activeModalResolvers = [];
+	_activeModalPromise = new Promise(resolveMain => {
+		const { title = '', message, options = null, status = null, preset = '' } = params;
+
 		const modal = document.createElement('dialog');
 		modal.classList.add('modal');
-
-		const modalItemsCont = document.createElement('div');
-		modalItemsCont.classList.add('modal-items');
+		const cont = document.createElement('div');
+		cont.classList.add('modal-items');
 
 		if (status) {
 			const icon = document.createElement('span');
 			icon.classList.add('material-symbols-rounded');
-			let ic = "warning";
-			if (status === "success") ic = "check_circle";
-			else if (status === "failed") ic = "dangerous";
+			let ic = 'warning';
+			if (status === 'success') ic = 'check_circle';
+			else if (status === 'failed') ic = 'dangerous';
 			icon.textContent = ic;
 			icon.classList.add('modal-icon');
-			modalItemsCont.appendChild(icon);
-
+			cont.appendChild(icon);
 		}
-		if (title && title.length > 0) {
 
+		if (title) {
 			const h1 = document.createElement('h1');
 			h1.textContent = title;
-			modalItemsCont.appendChild(h1);
+			cont.appendChild(h1);
 		}
 
 		const p = document.createElement('p');
-		if (type === 'say' || type === 'confirm') {
-			p.innerHTML = `${message}`;
-		} else {
-			p.textContent = message;
-		}
-		modalItemsCont.appendChild(p);
+		if (type === 'say' || type === 'confirm') p.innerHTML = `${message}`;
+		else p.textContent = message;
+		cont.appendChild(p);
 
 		let dropdown = null;
 		if (type === 'dropdown') {
@@ -1026,7 +1033,7 @@ function openModal(type, { title = '', message, options = null, status = null, p
 				opt.textContent = option;
 				dropdown.appendChild(opt);
 			}
-			modalItemsCont.appendChild(dropdown);
+			cont.appendChild(dropdown);
 		}
 
 		let inputField = null;
@@ -1034,50 +1041,61 @@ function openModal(type, { title = '', message, options = null, status = null, p
 			inputField = document.createElement('input');
 			inputField.type = 'text';
 			inputField.value = preset;
-			modalItemsCont.appendChild(inputField);
+			cont.appendChild(inputField);
 		}
 
-		const btnContainer = document.createElement('div');
-		btnContainer.classList.add('button-container');
-		modalItemsCont.appendChild(btnContainer);
+		const btns = document.createElement('div');
+		btns.classList.add('button-container');
+		cont.appendChild(btns);
 
-		const yesButton = document.createElement('button');
-		yesButton.textContent = type === 'confirm' ? 'Yes' : 'OK';
-		btnContainer.appendChild(yesButton);
+		const yes = document.createElement('button');
+		yes.textContent = type === 'confirm' ? 'Yes' : 'OK';
+		btns.appendChild(yes);
 
 		if (type === 'confirm' || type === 'dropdown') {
-			const noButton = document.createElement('button');
-			noButton.textContent = type === 'confirm' ? 'No' : 'Cancel';
-			btnContainer.appendChild(noButton);
-			noButton.onclick = () => {
+			const no = document.createElement('button');
+			no.textContent = type === 'confirm' ? 'No' : 'Cancel';
+			btns.appendChild(no);
+
+			no.onclick = () => {
 				modal.close();
 				modal.remove();
-				resolve(false);
+				const v = false;
+				resolveMain(v);
+				for (const r of _activeModalResolvers) r(v);
+				_activeModalKey = null;
+				_activeModalPromise = null;
+				_activeModalResolvers = [];
 			};
 		}
 
-		yesButton.onclick = () => {
+		yes.onclick = () => {
 			modal.close();
 			modal.remove();
-			if (type === 'dropdown') {
-				resolve(dropdown.value);
-			} else if (type === 'ask') {
-				resolve(inputField.value);
-			} else {
-				resolve(true);
-			}
+			let v = true;
+			if (type === 'dropdown') v = dropdown.value;
+			else if (type === 'ask') v = inputField.value;
+			resolveMain(v);
+			for (const r of _activeModalResolvers) r(v);
+			_activeModalKey = null;
+			_activeModalPromise = null;
+			_activeModalResolvers = [];
 		};
 
 		if (registerRef) {
-			document.getElementById("window" + notificationContext[registerRef]?.windowID).querySelectorAll(".windowcontent")[0].appendChild(modal);
+			document.getElementById("window" + notificationContext[registerRef]?.windowID)
+				.querySelectorAll(".windowcontent")[0]
+				.appendChild(modal);
+			modal.appendChild(cont);
 			modal.show();
-			modal.appendChild(modalItemsCont);
 		} else {
 			document.body.appendChild(modal);
-			modal.appendChild(modalItemsCont);
+			modal.appendChild(cont);
 			modal.showModal();
 		}
 	});
+
+	return new Promise(r => _activeModalResolvers.push(r));
 }
 
 function justConfirm(title, message, registerRef = false) {
@@ -1236,14 +1254,15 @@ async function initializeOS() {
 	dbCache = null;
 	cryptoKeyCache = null;
 	await say(`
-		<h2>This is an open source system</h2>
-		<p style="">NovaOS uses several browser APIs to store, manage and display data.
-		</p>
-		<div style="background:: #001b00; color: lightgreen; padding: 0.8rem; border: 1px solid #254625;font-size:inherit; border-radius: .5rem; margin: 0rem 0; display: flex;flex-direction:row; align-items: center; justify-content: flex-start;gap:0.5rem;">
+		<h2>Welcome to NovaOS Web</h2>
+		<p style="margin-bottom:0;">
+		NovaOS uses Google to count users. Clicking OK stores data required for NovaOS to startup in your browser. 
+		</p><div style="background:: #001b00; color: lightgreen; padding: 0.8rem; border: 1px solid #254625;font-size:inherit; border-radius: .5rem; margin-top: 0.8rem; display: flex;flex-direction:row; align-items: center; margin-bottom:0; justify-content: flex-start;gap:0.5rem;">
 			<span class="material-symbols-rounded">check</span>
-			<div>We do not store or share your personal information.</div>
+			<div>We do not store your personal information. NovaOS is open source.</div>
 		</div>
-	`);
+		</p>
+	`, "warning");
 	console.log("Setting Up NovaOS\n\nUsername: " + CurrentUsername + "\nWith: Sample preset\nUsing host: " + location.href)
 	initialization = true
 	memory = {
@@ -2226,10 +2245,6 @@ async function appGroupModal(name, list) {
 			getAppIcon(false, app.id).then((appIcon) => {
 				iconSpan.innerHTML = appIcon;
 			});
-
-			function getapnme(x) {
-				return x.split(".")[0];
-			}
 
 			var nameSpan = document.createElement("span");
 			nameSpan.className = "appname";

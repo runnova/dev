@@ -5,7 +5,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 	<title>Nova OS</title>
-	<meta name="description" content="NovaOS is the open-source, stable, fully-local web desktop system, made for every modern browser and device.">
+	<meta name="description"
+		content="NovaOS is the open-source, stable, fully-local web desktop system, made for every modern browser and device.">
 	<meta property="og:image" content="https://adthoughtsglobal.github.io/assets/novass.png" />
 	<script src="scripts/readwrite.js" defer></script>
 	<script src="scripts/system32.js" defer></script>
@@ -35,8 +36,8 @@
 	<div id="main">
 		<div class="container2">
 			<div id="bgimage">
-				<img id="bgimage1" class="bgimage"/>
-				<img id="bgimage2" class="bgimage"/>
+				<img id="bgimage1" class="bgimage" />
+				<img id="bgimage2" class="bgimage" />
 			</div>
 
 			<div id="snappingIndicator">
@@ -138,17 +139,17 @@
 
 		<div id="toastdiv">
 			<div class="toastInner">
-				
-			<div id="toasticon"></div>
-			<div id="toastdivtext">
 
-			</div>
+				<div id="toasticon"></div>
+				<div id="toastdivtext">
+
+				</div>
 			</div>
 		</div>
 
 		<div id="workspace">
 			<div id="windowscont">
-				
+
 			</div>
 			<div id="maxappscontainer">
 
@@ -174,7 +175,7 @@
 					</your>
 					<info navobj>
 						<div id="panels">
-							
+
 						</div>
 						<div id="batterydisdiv" class="navmalobj">
 							<span id="battery-p-display">
@@ -194,7 +195,7 @@
 					</info>
 				</div>
 			</nav>
-			
+
 		</div>
 
 		<dialog id="appdmod" class="scalableui onramcloseable navWindows">
@@ -213,46 +214,46 @@
 						</div>
 						<div class="toolspart">
 
-						<button class="tooltip " onclick="location.reload()">
-							<span class="tooltiptext">Restart</span>
-							<span class="material-symbols-rounded">
-								restart_alt
-							</span>
-						</button>
+							<button class="tooltip " onclick="location.reload()">
+								<span class="tooltiptext">Restart</span>
+								<span class="material-symbols-rounded">
+									restart_alt
+								</span>
+							</button>
 
-						<button class="tooltip " onclick="document.getElementById('sleepwindow').showModal()">
-							<span class="tooltiptext">Sleep</span>
-							<span class="material-symbols-rounded">
-								bedtime
-							</span>
-						</button>
-						<button class="tooltip " onclick="launchbios()">
-							<span class="tooltiptext">Nova Setup</span>
-							<span class="material-symbols-rounded">
-								power
-							</span>
-						</button>
-						<button class="tooltip " onclick="closeallwindows()">
-							<span class="tooltiptext">Close all windows</span>
-							<div class="checkbox-wrapper-44">
-								<label class="toggleButton">
-									<input type="checkbox" id="closeallwinsbtn">
-									<div>
-										<svg viewBox="0 0 44 44">
-											<path
-												d="M14,24 L21,31 L39.7428882,11.5937758 C35.2809627,6.53125861 30.0333333,4 24,4 C12.95,4 4,12.95 4,24 C4,35.05 12.95,44 24,44 C35.05,44 44,35.05 44,24 C44,19.3 42.5809627,15.1645919 39.7428882,11.5937758"
-												transform="translate(-2.000000, -2.000000)"></path>
-										</svg>
-									</div>
-								</label>
-							</div>
-						</button>
-						<button class="tooltip " style="margin-left: auto;" onclick="logoutofnova()">
-							<span class="tooltiptext">Sign Out</span>
-							<span class="material-symbols-rounded">
-								logout
-							</span>
-						</button>
+							<button class="tooltip " onclick="document.getElementById('sleepwindow').showModal()">
+								<span class="tooltiptext">Sleep</span>
+								<span class="material-symbols-rounded">
+									bedtime
+								</span>
+							</button>
+							<button class="tooltip " onclick="launchbios()">
+								<span class="tooltiptext">Nova Setup</span>
+								<span class="material-symbols-rounded">
+									power
+								</span>
+							</button>
+							<button class="tooltip " onclick="closeallwindows()">
+								<span class="tooltiptext">Close all windows</span>
+								<div class="checkbox-wrapper-44">
+									<label class="toggleButton">
+										<input type="checkbox" id="closeallwinsbtn">
+										<div>
+											<svg viewBox="0 0 44 44">
+												<path
+													d="M14,24 L21,31 L39.7428882,11.5937758 C35.2809627,6.53125861 30.0333333,4 24,4 C12.95,4 4,12.95 4,24 C4,35.05 12.95,44 24,44 C35.05,44 44,35.05 44,24 C44,19.3 42.5809627,15.1645919 39.7428882,11.5937758"
+													transform="translate(-2.000000, -2.000000)"></path>
+											</svg>
+										</div>
+									</label>
+								</div>
+							</button>
+							<button class="tooltip " style="margin-left: auto;" onclick="logoutofnova()">
+								<span class="tooltiptext">Sign Out</span>
+								<span class="material-symbols-rounded">
+									logout
+								</span>
+							</button>
 						</div>
 					</div>
 				</div>
@@ -415,7 +416,9 @@
 			<div class="modal-items">
 				<div class="app_inst_dia_nav">
 					<div id="app_inst_dia_icon"></div>
-					<p><span id="app_inst_mod_app_name"></span></p>
+					<p>
+						<small>Installing</small>
+						<span id="app_inst_mod_app_name"></span></p>
 				</div>
 
 				<ul id="app_inst_mod_li">
