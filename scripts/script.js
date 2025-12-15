@@ -364,6 +364,10 @@ async function openn() {
 				insertSVG(appIcon, iconSpan);
 			});
 
+			function getapnme(x) {
+				return x.split(".")[0];
+			}
+
 			var nameSpan = document.createElement("span");
 			nameSpan.className = "appname";
 			nameSpan.textContent = getapnme(app.name);
@@ -791,116 +795,129 @@ async function extractAndRegisterCapabilities(appId, content) {
 			content = await getFileById(appId);
 			content = content.content;
 		}
-		if (isBase64(content)) content = decodeBase64Content(content);
-
+		if (isBase64(content)) {
+			content = decodeBase64Content(content);
+		}
 		let parser = new DOMParser();
 		let doc = parser.parseFromString(content, "text/html");
-		let setup = doc.querySelector('script[for="ntxSetup"][type="application/json"]');
-		let cfg = setup ? JSON.parse(setup.textContent) : {};
-		let capabilities = cfg.capabilities || [];
-		let requestedperms = cfg.permissions || [];
-		let novainclude = cfg["nova-include"] || [];
+
+		let metaTag = doc.querySelector('meta[name="capabilities"]');
+		let capabilities = [];
+		if (metaTag) {
+			capabilities = metaTag.getAttribute("content").split(',').map(s => s.trim());
+		} else {
+			console.log(`No capabilities: ${appId}`);
+		}
+		let onlyDefPerms = false;
 		let totalperms = ['utility', 'sysUI'];
+		let metaTag2 = doc.querySelector('meta[name="permissions"]');
+		let requestedperms = [];
+		if (metaTag2) {
+			requestedperms = metaTag2.getAttribute("content").split(',').map(s => s.trim());
+		} else {
+			console.log(`No permissions: ${appId}`);
+			onlyDefPerms = true
+		}
 
-		let appName = getapnme(await getFileNameByID(appId));
-		let appAuthor = cfg.author;
-		// if (!appAuthor) {
-		// 	say("Failed to install application: application lacks an author", "failed");
-		// 	return;
-		// }
-
-		let appTag = appName + '@' + appAuthor;
-
-		function arraysEqualIgnoreOrder(a, b) {
-			if (a.length !== b.length) return false;
-			let s1 = [...a].sort();
-			let s2 = [...b].sort();
-			for (let i = 0; i < s1.length; i++) if (s1[i] !== s2[i]) return false;
+		function arraysEqualIgnoreOrder(arr1, arr2) {
+			if (arr1.length !== arr2.length) return false;
+			let sorted1 = [...arr1].sort();
+			let sorted2 = [...arr2].sort();
+			for (let i = 0; i < sorted1.length; i++) {
+				if (sorted1[i] !== sorted2[i]) return false;
+			}
 			return true;
 		}
 
-		let onlyDefPerms = requestedperms.length === 0 || arraysEqualIgnoreOrder(requestedperms, totalperms);
+		onlyDefPerms = (onlyDefPerms) ? true : arraysEqualIgnoreOrder(requestedperms, totalperms);
+
 		let permissions = Array.from(new Set([...totalperms, ...requestedperms]));
 
 		if (!onlyDefPerms) {
 			let modal = gid("AppInstDia");
 			gid("app_inst_dia_icon").innerHTML = await getAppIcon(0, appId);
+			let appName = await getFileNameByID(appId);
 			gid("app_inst_mod_app_name").innerText = appName;
-			let list = gid("app_inst_mod_li");
-			list.innerHTML = '';
-
-			if (capabilities.length) {
-				const handlers = capabilities.filter(c => c[0] !== '.' && c !== 'onStartup').join(', ');
-				if (handlers) {
-					const li = document.createElement('li');
-					li.innerHTML = `Function as ${handlers}`;
-					list.appendChild(li);
+			let listelement = gid("app_inst_mod_li");
+			listelement.innerHTML = '';
+			if (capabilities.length > 0) {
+				let handlerList = capabilities.filter(c => !c.startsWith('.') && c !== 'onStartup').join(', ');
+				if (handlerList) {
+					let span = document.createElement("li");
+					span.innerHTML = `Function as ${handlerList}`;
+					listelement.appendChild(span);
 				}
 
-				const types = capabilities.filter(c => c[0] === '.').join(', ');
-				if (types) {
-					const li = document.createElement('li');
-					li.innerHTML = `Open ${types} by default`;
-					list.appendChild(li);
+				let fileTypes = capabilities.filter(c => c.startsWith('.')).join(', ');
+				if (fileTypes) {
+					let span = document.createElement("li");
+					span.innerHTML = `Open ${fileTypes} by default`;
+					listelement.appendChild(span);
 				}
 
 				if (capabilities.includes('onStartup')) {
-					const li = document.createElement('li');
-					li.innerHTML = 'Run during startup';
-					list.appendChild(li);
+					let span = document.createElement("li");
+					span.innerHTML = "Run during startup";
+					listelement.appendChild(span);
 				}
 			}
 
 			permissions.sort((a, b) => getNamespaceRisk(b) - getNamespaceRisk(a));
+
 			if (permissions.includes("unsandboxed")) {
-				let li = document.createElement("li");
-				li.innerHTML = describeNamespaces("unsandboxed").replace(/^./, c => c.toUpperCase()) + `<small>Only recommended for apps you trust.</small>`;
-				list.appendChild(li);
+				let span = document.createElement("li");
+				span.innerHTML = describeNamespaces("unsandboxed").replace(/^./, c => c.toUpperCase());
+				span.innerHTML += `<small>Only recommended for apps you trust.</small>`;
+				listelement.appendChild(span);
 			} else {
-				permissions.forEach(p => {
-					let li = document.createElement("li");
-					li.innerHTML = describeNamespaces(p).replace(/^./, c => c.toUpperCase());
-					list.appendChild(li);
+				permissions.forEach((perm) => {
+					let span = document.createElement("li");
+					span.innerHTML = describeNamespaces(perm).replace(/^./, c => c.toUpperCase());
+					listelement.appendChild(span);
 				});
 			}
 
-			let yes = gid("app_inst_mod_agbtn");
-			let no = gid("app_inst_mod_nobtn");
+			let yesButton = gid("app_inst_mod_agbtn");
+			let noButton = gid("app_inst_mod_nobtn");
 			let lclver = await getSetting("versions", "defaultApps.json") || {};
 			let defaultappsext = Object.values(lclver).some(a => a.appid === appId);
 
-			let condition = await new Promise(resolve => {
+			let condition = await new Promise((resolve) => {
 				if (initialization || defaultappsext) {
 					if (defaultappsext) toast(appName + " Updated");
 					return resolve(true);
 				}
+
 				modal.showModal();
-				yes.onclick = () => {
+				yesButton.onclick = () => {
 					modal.close();
 					resolve(true);
 				};
-				no.onclick = () => {
+				noButton.onclick = () => {
 					modal.close();
 					resolve(false);
 				};
 			});
+
+
 			if (!condition) return;
 		}
 
-		requestedperms.forEach(p => {
-			if (!totalperms.includes(p)) totalperms.push(p);
+		requestedperms.forEach((perm) => {
+			if (!totalperms.includes(perm)) {
+				totalperms.push(perm);
+			}
 		});
-
 		await registerApp(appId, capabilities);
+
 		let registry = {};
 		registry.perms = totalperms;
-		registry.tag = appTag;
 		await setSetting(appId, registry, "AppRegistry.json");
-	} catch (e) {
-		console.error("Error extracting and registering capabilities:", e);
+
+	} catch (error) {
+		console.error("Error extracting and registering capabilities:", error);
 	}
 }
-
 async function registerApp(appId, capabilities) {
 	for (let rawCapability of capabilities) {
 		let capability = rawCapability.trim();
@@ -979,49 +996,40 @@ function makedialogclosable(ok) {
 		}
 	});
 }
-let _activeModalKey = null;
-let _activeModalPromise = null;
-let _activeModalResolvers = [];
-
-function openModal(type, params = {}, registerRef = false) {
-	if (badlaunch) return;
-	const key = JSON.stringify([type, params, registerRef]);
-
-	if (key === _activeModalKey && _activeModalPromise) {
-		return new Promise(r => _activeModalResolvers.push(r));
-	}
-
-	_activeModalKey = key;
-	_activeModalResolvers = [];
-	_activeModalPromise = new Promise(resolveMain => {
-		const { title = '', message, options = null, status = null, preset = '' } = params;
-
+function openModal(type, { title = '', message, options = null, status = null, preset = '' } = {}, registerRef = false) {
+	if (badlaunch) { return }
+	return new Promise((resolve) => {
 		const modal = document.createElement('dialog');
 		modal.classList.add('modal');
-		const cont = document.createElement('div');
-		cont.classList.add('modal-items');
+
+		const modalItemsCont = document.createElement('div');
+		modalItemsCont.classList.add('modal-items');
 
 		if (status) {
 			const icon = document.createElement('span');
 			icon.classList.add('material-symbols-rounded');
-			let ic = 'warning';
-			if (status === 'success') ic = 'check_circle';
-			else if (status === 'failed') ic = 'dangerous';
+			let ic = "warning";
+			if (status === "success") ic = "check_circle";
+			else if (status === "failed") ic = "dangerous";
 			icon.textContent = ic;
 			icon.classList.add('modal-icon');
-			cont.appendChild(icon);
-		}
+			modalItemsCont.appendChild(icon);
 
-		if (title) {
+		}
+		if (title && title.length > 0) {
+
 			const h1 = document.createElement('h1');
 			h1.textContent = title;
-			cont.appendChild(h1);
+			modalItemsCont.appendChild(h1);
 		}
 
 		const p = document.createElement('p');
-		if (type === 'say' || type === 'confirm') p.innerHTML = `${message}`;
-		else p.textContent = message;
-		cont.appendChild(p);
+		if (type === 'say' || type === 'confirm') {
+			p.innerHTML = `${message}`;
+		} else {
+			p.textContent = message;
+		}
+		modalItemsCont.appendChild(p);
 
 		let dropdown = null;
 		if (type === 'dropdown') {
@@ -1033,7 +1041,7 @@ function openModal(type, params = {}, registerRef = false) {
 				opt.textContent = option;
 				dropdown.appendChild(opt);
 			}
-			cont.appendChild(dropdown);
+			modalItemsCont.appendChild(dropdown);
 		}
 
 		let inputField = null;
@@ -1041,61 +1049,50 @@ function openModal(type, params = {}, registerRef = false) {
 			inputField = document.createElement('input');
 			inputField.type = 'text';
 			inputField.value = preset;
-			cont.appendChild(inputField);
+			modalItemsCont.appendChild(inputField);
 		}
 
-		const btns = document.createElement('div');
-		btns.classList.add('button-container');
-		cont.appendChild(btns);
+		const btnContainer = document.createElement('div');
+		btnContainer.classList.add('button-container');
+		modalItemsCont.appendChild(btnContainer);
 
-		const yes = document.createElement('button');
-		yes.textContent = type === 'confirm' ? 'Yes' : 'OK';
-		btns.appendChild(yes);
+		const yesButton = document.createElement('button');
+		yesButton.textContent = type === 'confirm' ? 'Yes' : 'OK';
+		btnContainer.appendChild(yesButton);
 
 		if (type === 'confirm' || type === 'dropdown') {
-			const no = document.createElement('button');
-			no.textContent = type === 'confirm' ? 'No' : 'Cancel';
-			btns.appendChild(no);
-
-			no.onclick = () => {
+			const noButton = document.createElement('button');
+			noButton.textContent = type === 'confirm' ? 'No' : 'Cancel';
+			btnContainer.appendChild(noButton);
+			noButton.onclick = () => {
 				modal.close();
 				modal.remove();
-				const v = false;
-				resolveMain(v);
-				for (const r of _activeModalResolvers) r(v);
-				_activeModalKey = null;
-				_activeModalPromise = null;
-				_activeModalResolvers = [];
+				resolve(false);
 			};
 		}
 
-		yes.onclick = () => {
+		yesButton.onclick = () => {
 			modal.close();
 			modal.remove();
-			let v = true;
-			if (type === 'dropdown') v = dropdown.value;
-			else if (type === 'ask') v = inputField.value;
-			resolveMain(v);
-			for (const r of _activeModalResolvers) r(v);
-			_activeModalKey = null;
-			_activeModalPromise = null;
-			_activeModalResolvers = [];
+			if (type === 'dropdown') {
+				resolve(dropdown.value);
+			} else if (type === 'ask') {
+				resolve(inputField.value);
+			} else {
+				resolve(true);
+			}
 		};
 
 		if (registerRef) {
-			document.getElementById("window" + notificationContext[registerRef]?.windowID)
-				.querySelectorAll(".windowcontent")[0]
-				.appendChild(modal);
-			modal.appendChild(cont);
+			document.getElementById("window" + notificationContext[registerRef]?.windowID).querySelectorAll(".windowcontent")[0].appendChild(modal);
 			modal.show();
+			modal.appendChild(modalItemsCont);
 		} else {
 			document.body.appendChild(modal);
-			modal.appendChild(cont);
+			modal.appendChild(modalItemsCont);
 			modal.showModal();
 		}
 	});
-
-	return new Promise(r => _activeModalResolvers.push(r));
 }
 
 function justConfirm(title, message, registerRef = false) {
@@ -1254,15 +1251,14 @@ async function initializeOS() {
 	dbCache = null;
 	cryptoKeyCache = null;
 	await say(`
-		<h2>Welcome to NovaOS Web</h2>
-		<p style="margin-bottom:0;">
-		NovaOS uses Google to count users. Clicking OK stores data required for NovaOS to startup in your browser. 
-		</p><div style="background:: #001b00; color: lightgreen; padding: 0.8rem; border: 1px solid #254625;font-size:inherit; border-radius: .5rem; margin-top: 0.8rem; display: flex;flex-direction:row; align-items: center; margin-bottom:0; justify-content: flex-start;gap:0.5rem;">
-			<span class="material-symbols-rounded">check</span>
-			<div>We do not store your personal information. NovaOS is open source.</div>
-		</div>
+		<h2>This is an open source system</h2>
+		<p style="">NovaOS uses several browser APIs to store, manage and display data.
 		</p>
-	`, "warning");
+		<div style="background:: #001b00; color: lightgreen; padding: 0.8rem; border: 1px solid #254625;font-size:inherit; border-radius: .5rem; margin: 0rem 0; display: flex;flex-direction:row; align-items: center; justify-content: flex-start;gap:0.5rem;">
+			<span class="material-symbols-rounded">check</span>
+			<div>We do not store or share your personal information.</div>
+		</div>
+	`);
 	console.log("Setting Up NovaOS\n\nUsername: " + CurrentUsername + "\nWith: Sample preset\nUsing host: " + location.href)
 	initialization = true
 	memory = {
@@ -2245,6 +2241,10 @@ async function appGroupModal(name, list) {
 			getAppIcon(false, app.id).then((appIcon) => {
 				iconSpan.innerHTML = appIcon;
 			});
+
+			function getapnme(x) {
+				return x.split(".")[0];
+			}
 
 			var nameSpan = document.createElement("span");
 			nameSpan.className = "appname";

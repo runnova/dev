@@ -1662,7 +1662,7 @@
 			<button class="tablinks btnlike" windowopener="Preferences"
 				onclick="openCity(event, 'defaults'); defs5(); defs2(); defs3()"><i
 					class="material-symbols-rounded">tune</i> Preferences</button>
-			<button class="tablinks btnlike" windowopener="Display" onclick="openCity(event, 'exp'); defs();"><i
+			<button class="tablinks btnlike" windowopener="Display" onclick="openCity(event, 'exp'); defs();initColorPickers();"><i
 					class="material-symbols-rounded">format_paint</i>
 				Theme</button>
 			<button class="tablinks btnlike" windowopener="User" onclick="openCity(event, 'password')"><i
@@ -2785,8 +2785,7 @@
 				<p>Star the repo! It's Open Source:
 				</p>
 				<div class="supportbtns">
-					<a id="membershipsbtn"
-						onclick="window.open('https://github.com/runnova/NovaOS')">Star the repo</a>
+					<a id="membershipsbtn" onclick="window.open('https://github.com/runnova/NovaOS')">Star the repo</a>
 				</div>
 
 				<script>
@@ -3331,28 +3330,23 @@
 			</segr>
 			<script>
 
-				function normalizeBorderRadius(inputRem) {
-					const allowedValues = ["1rem", ".7rem", ".5rem", ".3rem", "0rem"];
-					const parsedInput = parseFloat(inputRem);
+				function normalizeBorderRadius(value) {
+					const allowed = ["1rem", , ".5rem", , "0rem"];
+					const n = parseFloat(value);
+					if (!Number.isFinite(n)) return "0rem";
 
-					if (isNaN(parsedInput)) {
-						return "0rem";
-					}
+					let best = allowed[0];
+					let diff = Math.abs(n - parseFloat(best));
 
-					let closest = allowedValues[0];
-					let minDiff = Math.abs(parsedInput - parseFloat(closest));
-
-					for (const val of allowedValues) {
-						const diff = Math.abs(parsedInput - parseFloat(val));
-						if (diff < minDiff) {
-							closest = val;
-							minDiff = diff;
+					for (const v of allowed) {
+						const d = Math.abs(n - parseFloat(v));
+						if (d < diff) {
+							best = v;
+							diff = d;
 						}
 					}
-
-					return closest;
+					return best;
 				}
-
 				async function copyCurrentTheme() {
 					const colorsToCopy = {};
 					document.querySelectorAll('[data-variable]').forEach(button => {
@@ -3372,14 +3366,14 @@
 				async function pasteThemeFromClipboard() {
 					try {
 						const text = await navigator.clipboard.readText();
-						const parsedColors = JSON.parse(text);
+						const parsedColors = normalizeTheme(JSON.parse(text));
 						var variableName;
 
 						if (typeof parsedColors === 'object' && parsedColors !== null) {
 							const buttons = document.querySelectorAll('[data-variable]');
 							buttons.forEach(button => {
 								try {
-									const variableName = button.dataset.variable;
+									const variableName = button.getAttribute("data-variable");
 									if (parsedColors[variableName]) {
 										if (button.classList.contains('colorpickerui')) {
 											button.jscolor.fromString(parsedColors[variableName]);
@@ -3392,10 +3386,10 @@
 											}
 											button.value = value;
 										}
-	
+
 									}
 								} catch (error) {
-									
+
 								}
 							});
 							if (parsedColors['wallpaper']) {
@@ -3415,6 +3409,29 @@
 						ntxSession.send("sysUI.say", 'Failed to apply theme from clipboard. Ensure it contains valid JSON.');
 					}
 				}
+
+				const OLD_TO_NEW = {
+					"--colors-BG-normal": "--col-bg1",
+					"--colors-BG-section": "--col-bg2",
+					"--colors-BG-sub": "--col-bg3",
+					"--colors-BG-highlighted": "--col-bgh",
+					"--colors-text-normal": "--col-txt1",
+					"--colors-text-high": "--col-txth",
+					"--colors-special-good": "--col-good",
+					"--colors-special-bad": "--col-bad",
+					"--sizing-normal": "--sizing-normal",
+					"--sizing-border-radius": "--siz-radius1"
+				};
+
+				function normalizeTheme(obj) {
+					const out = {};
+					for (const k in obj) {
+						if (OLD_TO_NEW[k]) out[OLD_TO_NEW[k]] = obj[k];
+						else out[k] = obj[k];
+					}
+					return out;
+				}
+
 			</script>
 			<h1>Wallpaper</h1>
 			<segr>
@@ -3577,7 +3594,7 @@
 						newurl.value = (fileID) ? fileID : '';
 					}
 					await ntxSession.send("settings.set", "wall", newurl.value);
-
+					window.parent.novarefresh();
 				}
 				var prevCityBtn = null;
 				function openCity(evt, cityName) {
@@ -3792,7 +3809,7 @@
 					el.addEventListener('change', () => {
 						ntxSession.send("settings.set", key, el.checked === true);
 						if (window.parent.sessionSettingKeys.includes(key))
-						ntx.sysUI.toast("Refresh homescreen to apply settings")
+							ntx.sysUI.toast("Refresh homescreen to apply settings")
 					});
 				}
 			});
