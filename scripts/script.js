@@ -801,19 +801,19 @@ async function extractAndRegisterCapabilities(appId, content) {
 		let parser = new DOMParser();
 		let doc = parser.parseFromString(content, "text/html");
 
-		let metaTag = doc.querySelector('meta[name="capabilities"]');
+		const el = doc.querySelector('script[type="application/json"][data-for="ntxSetup"]')
+		const setupScriptData = el ? JSON.parse(el.textContent) : false;
 		let capabilities = [];
-		if (metaTag) {
-			capabilities = metaTag.getAttribute("content").split(',').map(s => s.trim());
-		} else {
-			console.log(`No capabilities: ${appId}`);
+		if (setupScriptData) {
+			capabilities = setupScriptData["capabilities"];
 		}
+
 		let onlyDefPerms = false;
 		let totalperms = ['utility', 'sysUI'];
-		let metaTag2 = doc.querySelector('meta[name="permissions"]');
+		let permsRegAvble = setupScriptData["permissions"]?.length > 0;
 		let requestedperms = [];
-		if (metaTag2) {
-			requestedperms = metaTag2.getAttribute("content").split(',').map(s => s.trim());
+		if (permsRegAvble) {
+			requestedperms = setupScriptData["permissions"].map(s => s.trim());
 		} else {
 			console.log(`No permissions: ${appId}`);
 			onlyDefPerms = true
@@ -832,6 +832,7 @@ async function extractAndRegisterCapabilities(appId, content) {
 		onlyDefPerms = (onlyDefPerms) ? true : arraysEqualIgnoreOrder(requestedperms, totalperms);
 
 		let permissions = Array.from(new Set([...totalperms, ...requestedperms]));
+		let specialsFlags = setupScriptData["special-features"];
 
 		if (!onlyDefPerms) {
 			let modal = gid("AppInstDia");
@@ -840,25 +841,21 @@ async function extractAndRegisterCapabilities(appId, content) {
 			gid("app_inst_mod_app_name").innerText = appName;
 			let listelement = gid("app_inst_mod_li");
 			listelement.innerHTML = '';
-			if (capabilities.length > 0) {
-				let handlerList = capabilities.filter(c => !c.startsWith('.') && c !== 'onStartup').join(', ');
-				if (handlerList) {
-					let span = document.createElement("li");
-					span.innerHTML = `Function as ${handlerList}`;
-					listelement.appendChild(span);
-				}
-
-				let fileTypes = capabilities.filter(c => c.startsWith('.')).join(', ');
+			if (capabilities?.length > 0) {
+				let fileTypes = capabilities.join(', ');
 				if (fileTypes) {
 					let span = document.createElement("li");
 					span.innerHTML = `Open ${fileTypes} by default`;
 					listelement.appendChild(span);
 				}
 
-				if (capabilities.includes('onStartup')) {
-					let span = document.createElement("li");
-					span.innerHTML = "Run during startup";
-					listelement.appendChild(span);
+				if (specialsFlags) {
+					if (specialsFlags.includes("onStartup")) {
+
+						let span = document.createElement("li");
+						span.innerHTML = "Run during startup";
+						listelement.appendChild(span);
+					}
 				}
 			}
 
@@ -908,7 +905,7 @@ async function extractAndRegisterCapabilities(appId, content) {
 				totalperms.push(perm);
 			}
 		});
-		await registerApp(appId, capabilities);
+		await registerApp(appId, capabilities, specialsFlags);
 
 		let registry = {};
 		registry.perms = totalperms;
@@ -918,28 +915,31 @@ async function extractAndRegisterCapabilities(appId, content) {
 		console.error("Error extracting and registering capabilities:", error);
 	}
 }
-async function registerApp(appId, capabilities) {
-	for (let rawCapability of capabilities) {
-		let capability = rawCapability.trim();
-		if (capability === 'onStartup') continue;
-		if (capability.startsWith('.')) {
-			fileTypeAssociations[capability] = [appId];
-		} else {
-			handlers[capability] = appId;
+async function registerApp(appId, capabilities, specialsFlags) {
+	if (capabilities?.length) {
+		for (let rawCapability of capabilities) {
+			let capability = rawCapability.trim();
+			if (capability.startsWith('.')) {
+				fileTypeAssociations[capability] = [appId];
+			} else {
+				handlers[capability] = appId;
+			}
 		}
 	}
-	await setSetting('fileTypeAssociations', fileTypeAssociations);
-	await setSetting('handlers', handlers);
 
-	if (capabilities.includes('onStartup')) {
-		let startupApps = await getSetting('RunOnStartup') || [];
-		if (!startupApps.includes(appId)) startupApps.push(appId);
-		await setSetting('RunOnStartup', startupApps);
+	await setSetting('fileTypeAssociations', fileTypeAssociations);
+
+	if (specialsFlags) {
+		if (specialsFlags.includes("onStartup")) {
+			let startupApps = await getSetting('RunOnStartup') || [];
+			if (!startupApps.includes(appId)) startupApps.push(appId);
+			await setSetting('RunOnStartup', startupApps);
+		}
 	}
 
 	if (!initialization)
-		notify(await getFileNameByID(appId) + " installed", "Registered " + capabilities.toString(), "NovaOS System");
-	return capabilities.toString();
+		notify(await getFileNameByID(appId) + " installed", "Now handles " + capabilities?.toString(), "NovaOS System");
+	return capabilities?.toString() || "";
 }
 
 async function cleanupInvalidAssociations() {
