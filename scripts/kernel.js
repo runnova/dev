@@ -30,9 +30,8 @@ function OLPreturn(data, transferID) {
 }
 
 async function useHandler(name, stufftodo) {
-    let data = await getSetting('handlers');
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const transferID = `${name}-${Date.now()}`;
         const timeout = setTimeout(() => {
             _olpResolverMap.delete(transferID);
@@ -41,7 +40,10 @@ async function useHandler(name, stufftodo) {
 
         _olpResolverMap.set(transferID, { resolve, timeout });
 
-        openfile(data[name], { data: stufftodo, trid: transferID });
+        let tagsLib = await getSetting("full","appTags.json");
+        console.log(tagsLib, name)
+        let finalAppId = tagsLib[name].id;
+        openfile(finalAppId, { data: stufftodo, trid: transferID });
     });
 }
 
@@ -84,7 +86,7 @@ async function openfile(x, stufftodo) {
             if (appIdToOpen) {
                 openlaunchprotocol(appIdToOpen, unid);
             } else {
-                say(`No apps installed can read this file. <br><a type="btn" onclick="useHandler('content_store', {'opener':'search', 'data':'${mm.type}'});">Search for handlers <span ic class="material-symbols-rounded">
+                say(`No apps installed can read this file. <br><a type="btn" onclick="useHandler('Store@runnova', {'opener':'search', 'data':'${mm.type}'});">Search for handlers <span ic class="material-symbols-rounded">
 								arrow_forward
 							</span></a>`, "failed")
             }
@@ -267,9 +269,14 @@ styleTag.textContent=e.data.css;
 }
 async function prepareIframeContent(cont, appid, winuid, mode = "normal") {
     let contentString = isBase64(cont) ? decodeBase64Content(cont) : (cont || "<center><h1>Unavailable</h1>App Data cannot be read.</center>");
+
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(contentString, "text/html");
+    const el = doc.querySelector('script[type="application/json"][data-for="ntxSetup"]')
+    const setupScriptData = el ? JSON.parse(el.textContent) : false;
     let styleBlock = '';
     if (mode === "normal") {
-        if (getMetaTagContent(contentString, 'nova-include')?.includes('nova.css')) {
+        if (setupScriptData["include"]?.includes('nova.css')) {
             let updatedCss = novadotcsscache || '';
             const novaCssTag = document.getElementById('novacsstag');
             if (novaCssTag) {
@@ -288,7 +295,7 @@ async function prepareIframeContent(cont, appid, winuid, mode = "normal") {
             }
             styleBlock += `<style>${updatedCss}</style>`;
         }
-        if (getMetaTagContent(contentString, 'nova-include')?.includes('material-symbols-rounded')) {
+        if (setupScriptData["include"]?.includes('material-symbols-rounded')) {
             const fontUrl = 'https://adthoughtsglobal.github.io/resources/MaterialSymbolsRounded.woff2';
             styleBlock += `<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;src:url(${fontUrl}) format('woff2');}.material-symbols-rounded{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;}</style>`;
         }
@@ -395,7 +402,13 @@ async function openapp(appTitle, external, customtodo, headless = false) {
 
             let appIcon = defaultAppIcon;
             try { appIcon = await getAppIcon(0, external); } catch (e) { };
-            openwindow(appTitle, AppContent, appIcon, getAppTheme(AppContent), getAppAspectRatio(AppContent), external, Gtodo);
+            
+			let DecAppContent = decodeBase64Content(AppContent);
+            let parser = new DOMParser();
+			let doc = parser.parseFromString(DecAppContent, "text/html");
+			const el = doc.querySelector('script[type="application/json"][data-for="ntxSetup"]')
+			const setupScriptData = el ? JSON.parse(el.textContent) : false;
+            openwindow(appTitle, AppContent, appIcon, getAppTheme(setupScriptData), getAppAspectRatio(setupScriptData), external, Gtodo);
             Gtodo = null;
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -450,7 +463,7 @@ function flwin(winElement) {
 async function safeRemoveApp(id) {
     try {
         await remSettingKey(id, "AppRegistry.json");
-        let settingid = handlers["content_store"];
+        let settingid = handlers["Store@runnova"];
         await remSettingKey(id, settingid + ".json");
         return true;
     } catch (error) {

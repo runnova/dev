@@ -14,7 +14,7 @@ window.fileActions = {
 	appSettings: {
 		icon: 'info',
 		label: 'App settings',
-		action: (itemuid) => useHandler("settings_manager", {"data":"appsets", "id":itemuid}),
+		action: (itemuid) => useHandler("Settings@runnova", {"data":"appsets", "id":itemuid}),
 		condition: (file) => mtpetxt(file.fileName) === 'app',
 	},
 	rename: {
@@ -32,7 +32,7 @@ window.fileActions = {
 		label: 'Open file location',
 		action: async (itemuid) => {
 			let currentreqID = genUID();
-			let appIdToOpen = handlers['file_manager'] || null;
+			let appIdToOpen = handlers['Files@runnova'] || null;
 			openlaunchprotocol(appIdToOpen, { "opener": 'showFile', "id":itemuid }, currentreqID);
 		},
 		condition: () => true,

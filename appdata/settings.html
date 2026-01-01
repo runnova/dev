@@ -8,12 +8,15 @@
 	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 	<script src="https://jscolor.com/release/2.5/jscolor-2.5.2/jscolor.js"></script>
 	<script src="https://adthoughtsglobal.github.io/owifive/editor/assets/sortable.js"></script>
-	<meta name="permissions" content="olp, settings, system, unsandboxed">
-	<meta name="capabilities" content="settings_manager">
-	<meta name="nova-include" content="nova.css material-symbols-rounded">
-	<meta name="nova-icon"
-		content="<svg width='232' height='232' viewBox='0 0 232 232' fill='none' xmlns='http://www.w3.org/2000/svg'> <g clip-path='url(#clip0_3_148)'> <rect x='28' y='28' width='175' height='175' rx='20' fill='#737373'/> <rect x='-8' y='115.5' width='174.655' height='174.655' rx='20' transform='rotate(-45 -8 115.5)' fill='#B4B4B4'/> <circle cx='115.5' cy='115.5' r='67.5' fill='white'/> <circle cx='115.5' cy='115.5' r='53.5' fill='#6179FF'/> </g> <defs> <clipPath id='clip0_3_148'> <rect width='232' height='232' fill='white'/> </clipPath> </defs> </svg>">
-
+	
+    <script type="application/json" data-for="ntxSetup">
+		{
+			"author":"runnova",
+			"include": ["nova.css", "material-symbols-rounded"],
+            "permissions":["olp", "settings", "system", "unsandboxed"],
+			"nova-icon": "<svg width='232' height='232' viewBox='0 0 232 232' fill='none' xmlns='http://www.w3.org/2000/svg'> <g clip-path='url(#clip0_3_148)'> <rect x='28' y='28' width='175' height='175' rx='20' fill='#737373'/> <rect x='-8' y='115.5' width='174.655' height='174.655' rx='20' transform='rotate(-45 -8 115.5)' fill='#B4B4B4'/> <circle cx='115.5' cy='115.5' r='67.5' fill='white'/> <circle cx='115.5' cy='115.5' r='53.5' fill='#6179FF'/> </g> <defs> <clipPath id='clip0_3_148'> <rect width='232' height='232' fill='white'/> </clipPath> </defs> </svg>"
+		}
+	</script>
 	<style>
 		* {
 			box-sizing: border-box;
@@ -1948,7 +1951,7 @@
 					}
 
 					async function chooseNewNavPnl() {
-						let fileID = await ntxSession.send("olp.useHandler", "file_manager", { opener: "any", dir: "Downloads/" });
+						let fileID = await ntxSession.send("olp.useHandler", "Files@runnova", { opener: "any", dir: "Downloads/" });
 						if (!fileID) return;
 
 						let file = await ntx.fileGet.byId(fileID);
@@ -2509,7 +2512,7 @@
 								clickedRowId = `row-${type}`;
 
 								replaceableapp = handlers;
-								let newHandler = await ntxSession.send("olp.useHandler", "file_manager", { "opener": "app", "dir": "Apps/" });
+								let newHandler = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": "app", "dir": "Apps/" });
 
 								for (let key in window.parent.handlers) {
 									if (window.parent.handlers.hasOwnProperty(key)) {
@@ -2627,7 +2630,7 @@
 				}
 
 				async function edituserpfp() {
-					let fileid = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'any', "dir": "Downloads/" })
+					let fileid = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'any', "dir": "Downloads/" })
 					ntxSession.send("fileGet.byId", fileid)
 						.then(async (url) => {
 							let content = url?.content;
@@ -2964,7 +2967,7 @@
 					};
 
 					document.querySelectorAll('.appInfoMngBtns')[2].onclick = async function () {
-						await ntxSession.send("olp.useHandler", "text_editor", appID);
+						await ntxSession.send("olp.useHandler", "Text@runnova", appID);
 					};
 
 					document.getElementById("openappwindowbtn").onclick = async function () {
@@ -3308,7 +3311,7 @@
 			</segr>
 			<segr style="margin-top: .5rem">
 				<div class="single_setting"
-					onclick="ntxSession.send('olp.useHandler','content_store', {'opener':'themes'})">
+					onclick="ntxSession.send('olp.useHandler','Store@runnova', {'opener':'themes'})">
 
 					<div class="settingName">
 						<span>Browse themes</span>
@@ -3478,7 +3481,7 @@
 			<script>
 				async function saveiconpack() {
 					if (document.getElementById("iconpackidinp").value == '') {
-						let packID = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'any', "dir": "Downloads/" })
+						let packID = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'any', "dir": "Downloads/" })
 						document.getElementById("iconpackidinp").value = (packID) ? packID : '';
 					}
 					let iconp;
@@ -3590,7 +3593,7 @@
 					var newurl = document.getElementById("wallpaperurl");
 					var oldurl = await ntxSession.send("settings.get", "wall");
 					if (newurl.value == '' || newurl.value == oldurl) {
-						let fileID = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'any', "dir": "Downloads/" })
+						let fileID = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'any', "dir": "Downloads/" })
 						newurl.value = (fileID) ? fileID : '';
 					}
 					await ntxSession.send("settings.set", "wall", newurl.value);

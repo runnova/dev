@@ -66,7 +66,7 @@ async function checkAndRunFromURL() {
 
 	if (viewapp) {
 		onstartup.push(async () => {
-			useHandler("content_store", { 'opener': 'viewapp', 'data': viewapp })
+			useHandler("Store@runnova", { 'opener': 'viewapp', 'data': viewapp })
 		});
 	}
 

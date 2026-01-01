@@ -427,33 +427,10 @@ async function loadrecentapps() {
 		appShortcutDiv.addEventListener("click", () => openapp(app.name, app.id));
 		var iconSpan = document.createElement("span");
 		iconSpan.classList.add("appicnspan");
-		if (!appicns[app.id]) {
-			const content = await getFileById(app.id);
-			const unshrunkContent = decodeBase64Content(content.content);
-			const tempElement = document.createElement('div');
-			tempElement.innerHTML = unshrunkContent;
-			const metaTags = tempElement.getElementsByTagName('meta');
-			let metaTagData = null;
-			Array.from(metaTags).forEach(tag => {
-				const tagName = tag.getAttribute('name');
-				const tagContent = tag.getAttribute('content');
-				if (tagName === 'nova-icon' && tagContent) {
-					metaTagData = tagContent;
-				}
-			});
-			if (typeof metaTagData === "string") {
-				if (containsSmallSVGElement(metaTagData)) {
-					iconSpan.innerHTML = metaTagData;
-				} else {
-					iconSpan.innerHTML = defaultAppIcon;
-				}
-			} else {
-				iconSpan.innerHTML = defaultAppIcon;
-			}
-			appicns[app.id] = iconSpan.innerHTML
-		} else {
-			iconSpan.innerHTML = appicns[app.id]
-		}
+		console.log(47973595, app.id)
+		iconhtml = await getAppIcon(false, app.id);
+		iconSpan.innerHTML = iconhtml;
+		appicns[app.id] = iconSpan.innerHTML;
 		var nameSpan = document.createElement("span");
 		nameSpan.className = "appname";
 		nameSpan.textContent = basename(app.name);
@@ -563,12 +540,11 @@ function getMetaTagContent(unshrunkContent, metaName, decode = false) {
 	);
 	return metaTag ? metaTag.getAttribute('content') : null;
 }
-function getAppTheme(unshrunkContent) {
-	return getMetaTagContent(unshrunkContent, 'theme-color', true);
+function getAppTheme(setupScriptData) {
+	return setupScriptData["theme-color"];
 }
-function getAppAspectRatio(unshrunkContent) {
-	const content = decodeBase64Content(unshrunkContent);
-	return content.includes("aspect-ratio") ? getMetaTagContent(content, 'aspect-ratio', false) : null;
+function getAppAspectRatio(setupScriptData) {
+	return setupScriptData["aspect-ratio"] || null;
 }
 async function getAppIcon(content, id, lazy = 0) {
 	try {
@@ -612,14 +588,20 @@ async function getAppIcon(content, id, lazy = 0) {
 				if (!file || !file.content) throw new Error("File content unavailable " + id);
 				content = file.content;
 			}
-			const iconContent = await withTimeout(getMetaTagContent(content, 'nova-icon', true));
-			if (iconContent && containsSmallSVGElement(iconContent)) {
+			content = decodeBase64Content(content);
+
+			let parser = new DOMParser();
+			let doc = parser.parseFromString(content, "text/html");
+			const el = doc.querySelector('script[type="application/json"][data-for="ntxSetup"]')
+			const setupScriptData = el ? JSON.parse(el.textContent) : false;
+			const iconContent = setupScriptData["nova-icon"];
+			if (iconContent) {
 				appicns[id] = iconContent;
 				await saveIconToRegistry(id, iconContent, registry);
 				return iconContent;
 			}
 		} catch (err) {
-			console.error("Error in getAppIcon:", err);
+			console.warn("Error in getAppIcon:", err);
 		}
 
 	} catch (e) { }
@@ -905,7 +887,7 @@ async function extractAndRegisterCapabilities(appId, content) {
 				totalperms.push(perm);
 			}
 		});
-		await registerApp(appId, capabilities, specialsFlags);
+		await registerApp(appId, capabilities, specialsFlags, setupScriptData);
 
 		let registry = {};
 		registry.perms = totalperms;
@@ -915,7 +897,7 @@ async function extractAndRegisterCapabilities(appId, content) {
 		console.error("Error extracting and registering capabilities:", error);
 	}
 }
-async function registerApp(appId, capabilities, specialsFlags) {
+async function registerApp(appId, capabilities, specialsFlags, setupScriptData = {}) {
 	if (capabilities?.length) {
 		for (let rawCapability of capabilities) {
 			let capability = rawCapability.trim();
@@ -927,6 +909,9 @@ async function registerApp(appId, capabilities, specialsFlags) {
 		}
 	}
 
+	let fileName = await getFileNameByID(appId);
+	let appTag = getapnme(fileName) + "@" + setupScriptData["author"];
+	await setSetting(appTag, { "id": appId }, "appTags.json")
 	await setSetting('fileTypeAssociations', fileTypeAssociations);
 
 	if (specialsFlags) {
@@ -938,7 +923,7 @@ async function registerApp(appId, capabilities, specialsFlags) {
 	}
 
 	if (!initialization)
-		notify(await getFileNameByID(appId) + " installed", "Now handles " + capabilities?.toString(), "NovaOS System");
+		notify(fileName + " installed", "Now handles " + capabilities?.toString(), "NovaOS System");
 	return capabilities?.toString() || "";
 }
 
@@ -1440,7 +1425,7 @@ async function rlstrtappse(event) {
 		}
 		if (appToOpen) {
 			if (appToOpen.type === 'folder') {
-				useHandler('file_manager', { 'opener': 'showDir', 'path': appToOpen.path });
+				useHandler('Files@runnova', { 'opener': 'showDir', 'path': appToOpen.path });
 			} else {
 				openfile(appToOpen.id);
 			}
@@ -1474,7 +1459,7 @@ async function rlstrtappse(event) {
 			if (item.type == "folder") {
 				icon = await getAppIcon('folder');
 				newElement.innerHTML = `<div>${icon} ${item.path}</div><span class="material-symbols-rounded">arrow_outward</span>`;
-				newElement.onclick = () => useHandler('file_manager', { 'opener': 'showDir', 'path': item.path });
+				newElement.onclick = () => useHandler('Files@runnova', { 'opener': 'showDir', 'path': item.path });
 			} else {
 				icon = await getAppIcon(0, item.id);
 				newElement.innerHTML = `<div>${icon} ${item.name}</div><span class="material-symbols-rounded">arrow_outward</span>`;
@@ -1495,7 +1480,7 @@ async function rlstrtappse(event) {
 		gid('seprw-appname').innerText = mostRelevantItem.name;
 		gid('seprw-openb').onclick = function () {
 			if (mostRelevantItem.type === 'folder') {
-				useHandler('file_manager', { 'opener': 'showDir', 'path': mostRelevantItem.path });
+				useHandler('Files@runnova', { 'opener': 'showDir', 'path': mostRelevantItem.path });
 			} else {
 				openfile(mostRelevantItem.id);
 			}

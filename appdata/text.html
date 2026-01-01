@@ -5,11 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text App</title>
-    <meta name="capabilities" content=".json,.txt,text_editor">
-    <meta name="permissions" content="utility, fileGet, olp, fileSet">
-    <meta name="nova-include" content="nova.css">
-    <meta name="nova-icon"
-        content="<svg width='214' height='214' viewBox='0 0 214 214' fill='none' xmlns='http://www.w3.org/2000/svg'> <g clip-path='url(#clip0_6_14)'> <rect x='7' y='7' width='199' height='199' rx='22' fill='#6179FF'/> <rect x='32' y='134' width='137' height='30' rx='15' fill='white' fill-opacity='0.5'/> <rect x='32' y='86' width='103' height='30' rx='15' fill='white' fill-opacity='0.5'/> <rect x='32' y='38' width='146' height='30' rx='15' fill='white' fill-opacity='0.5'/> <path d='M150.254 161.311L134.35 70.829L209.268 90.9032L150.254 161.311Z' fill='#FFC853'/> <path d='M150.512 161.177L145.221 130.666L170.349 137.399L150.512 161.177Z' fill='#484848'/> <rect x='207.532' y='94.611' width='76.1255' height='256.654' transform='rotate(-165 207.532 94.611)' fill='#856644'/> <rect x='177.012' y='86.4332' width='44.5291' height='256.654' transform='rotate(-165 177.012 86.4332)' fill='#D19450'/> </g> <defs> <clipPath id='clip0_6_14'> <rect width='214' height='214' fill='white'/> </clipPath> </defs> </svg>">
+
+    <script type="application/json" data-for="ntxSetup">
+		{
+			"author":"runnova",
+			"include": ["nova.css", "material-symbols-rounded"],
+            "permissions":["utility", "fileGet", "olp", "fileSet"],
+			"capabilities":[".json",".txt",".md"],
+			"nova-icon": "<svg width='214' height='214' viewBox='0 0 214 214' fill='none' xmlns='http://www.w3.org/2000/svg'> <g clip-path='url(#clip0_6_14)'> <rect x='7' y='7' width='199' height='199' rx='22' fill='#6179FF'/> <rect x='32' y='134' width='137' height='30' rx='15' fill='white' fill-opacity='0.5'/> <rect x='32' y='86' width='103' height='30' rx='15' fill='white' fill-opacity='0.5'/> <rect x='32' y='38' width='146' height='30' rx='15' fill='white' fill-opacity='0.5'/> <path d='M150.254 161.311L134.35 70.829L209.268 90.9032L150.254 161.311Z' fill='#FFC853'/> <path d='M150.512 161.177L145.221 130.666L170.349 137.399L150.512 161.177Z' fill='#484848'/> <rect x='207.532' y='94.611' width='76.1255' height='256.654' transform='rotate(-165 207.532 94.611)' fill='#856644'/> <rect x='177.012' y='86.4332' width='44.5291' height='256.654' transform='rotate(-165 177.012 86.4332)' fill='#D19450'/> </g> <defs> <clipPath id='clip0_6_14'> <rect width='214' height='214' fill='white'/> </clipPath> </defs> </svg>"
+		}
+	</script>
     <style>
         ::selection {
             background-color: var(--col-bgh);
@@ -24,10 +29,11 @@
             color: var(--col-txt1);
             box-sizing: border-box;
             transition: .2s;
-            margin: 0.5rem !important;
+            margin: 0.5rem;
             display: flex;
+            margin-top: 0;
             flex-direction: column;
-            height: calc(100% - 1rem);
+            height: calc(100% - .5rem);
         }
 
         body.dark-mode {
@@ -94,7 +100,7 @@
 <body>
 
     <nav>
-        <button onclick="ntxSession.send('olp.useHandler', 'text_editor')" class="navbutton">New</button>
+        <button onclick="ntxSession.send('olp.useHandler', 'Text@runnova')" class="navbutton">New</button>
         <button onclick="openfromfiles()" class="navbutton">Open</button>
         <button onclick="savetx(1)" id="sbtn" class="navbutton">Save</button>
         <button onclick="toggleDarkMode()" class="navbutton">Reading Mode</button>
@@ -110,7 +116,7 @@
 
         async function openfromfiles() {
             document.getElementById("thedisplay").value = "Waiting for you to open a file...";
-            const fileID = await ntx.olp.useHandler( "file_manager", { "opener": 'any', "dir": "Downloads/" });
+            const fileID = await ntx.olp.useHandler("Files@runnova", { "opener": 'any', "dir": "Downloads/" });
             const file = await ntx.fileGet.byId(fileID);
             readthefile(file);
         }
@@ -131,7 +137,7 @@
                     });
                 } else {
                     const dataUri = `data:text/plain;base64,${encodedContent}`;
-                    let toBeSavedToData = await ntxSession.send("olp.useHandler", "file_manager", { "opener": 'saveas',  "value":"Text file.txt"});
+                    let toBeSavedToData = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'saveas', "value": "Text file.txt" });
                     await ntxSession.send("fileSet.createFile", toBeSavedToData.path, toBeSavedToData.name, false, dataUri);
                 }
             } catch (e) { console.log(e) }
@@ -212,6 +218,7 @@
         async function readthefile(file) {
             currentfile = file;
             mode = "edit";
+            myWindow.setTitle(file.fileName);
             const mimePrefix = file.content.match(/^data:([^;]+);base64,/i);
 
             if (mimePrefix) {
