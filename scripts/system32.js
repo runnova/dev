@@ -371,6 +371,7 @@ const defaultFileData = {
         "defSearchEngine": "NWP",
         "nvaupdcheck": true,
         "windowloader": true,
+        "defAppProvider": "appdata/",
         "keepvisible": true
     }
 };

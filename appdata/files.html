@@ -2367,6 +2367,13 @@
 		}
 		window.fileActions = {
 			file: {
+				folder: {
+					icon: 'close',
+					label: 'Cancel',
+					action: (itemuid) => refresh(),
+					condition: (file) => true,
+					special: true
+				},
 				delete: {
 					icon: 'delete',
 					icon_color: '#ffb3ba',
