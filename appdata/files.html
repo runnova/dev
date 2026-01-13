@@ -4,7 +4,7 @@
 <head>
 	<title>Files app</title>
 	<meta name="description" content="Default Files app for Nova OS">
-    <script type="application/json" data-for="ntxSetup">
+	<script type="application/json" data-for="ntxSetup">
 		{
 			"author":"runnova",
 			"include": ["nova.css", "material-symbols-rounded"],
@@ -816,6 +816,12 @@
 		.visible {
 			visibility: visible !important;
 		}
+
+		.subtree {
+			border-left: 1px solid #8080806e;
+			margin-left: 17px;
+			padding-left: 5px;
+		}
 	</style>
 	<script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
 </head>
@@ -970,15 +976,15 @@
 
 	<div id="flap-mot">
 		<div flap-nav>
-			<div class="nowid" onclick="refresh()">
-				<a class="dropdownerthebob"><span class="material-symbols-rounded " id="ogrefreshbtn">refresh</span>
-				</a>
-			</div>
 			<div class="nowid flappsearch" id="fileapptitledis">
 				<div id="filetools">
 
 				</div>
 				<div id="moretoolsdropdwn"></div>
+				<div style="flex: 1;"></div>
+				<a class="dropdownerthebob" onclick="refresh()"><span class="material-symbols-rounded "
+						id="ogrefreshbtn">refresh</span>
+				</a>
 			</div>
 			<div class="nowid" onclick="upmd()">
 				<a class="dropdownerthebob"><span class="material-symbols-rounded " id="ogrefreshbtn">download</span>
@@ -1149,6 +1155,10 @@
 			opacity: 0.5;
 		}
 
+		.drop-scale {
+			transform: scale(1.1)
+		}
+
 		@keyframes shadowRolling {
 			0% {
 				box-shadow: 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
@@ -1236,8 +1246,17 @@
 					const folderDiv = document.createElement('div');
 					folderDiv.classList.add('subdir');
 					folderDiv.setAttribute('data-path', currentPath);
-					folderDiv.style.marginLeft = `${level * 10}px`;
 
+					const dirIcDiv = document.createElement("div");
+					dirIcDiv.classList.add("material-symbols-rounded");
+					dirIcDiv.textContent = getfolicon(key);
+
+					const dirNameDiv = document.createElement("div");
+					dirNameDiv.textContent = removeEndSlash(key);
+					dirNameDiv.style.flex = "1";
+
+					folderDiv.appendChild(dirIcDiv);
+					folderDiv.appendChild(dirNameDiv);
 					let hasSubtree = Object.keys(memory[key]).some(k => k.endsWith('/'));
 					let toggleBtn;
 					if (hasSubtree) {
@@ -1262,15 +1281,7 @@
 						folderDiv.appendChild(toggleBtn);
 					}
 
-					const dirIcDiv = document.createElement("div");
-					dirIcDiv.classList.add("material-symbols-rounded");
-					dirIcDiv.textContent = getfolicon(key);
 
-					const dirNameDiv = document.createElement("div");
-					dirNameDiv.textContent = removeEndSlash(key);
-
-					folderDiv.appendChild(dirIcDiv);
-					folderDiv.appendChild(dirNameDiv);
 					wrapper.appendChild(folderDiv);
 
 					folderDiv.addEventListener('click', e => {
@@ -1443,18 +1454,24 @@
 			});
 
 		}
+		let scaled = null
 
 		function Allowdrop(ev, obj) {
-			ev.preventDefault();
-			obj.style.transform = "scale(1.1)";
-			setTimeout(function () {
-				obj.style.transform = "";
+			ev.preventDefault()
+			document.getElementById("fileinfobn").innerHTML = "Drop to move to " + obj.querySelector("div:last-child").innerText
+			if (scaled === obj) return
+			if (scaled) scaled.classList.remove("drop-scale")
+			scaled = obj
+			obj.classList.add("drop-scale")
+			setTimeout(() => {
+				obj.classList.remove("drop-scale")
+				if (scaled === obj) scaled = null
 			}, 500)
 		}
-
 		function dropfl(ev, dat) {
 			let data = ev.dataTransfer.getData("Text");
-			moveFileToFolder(data, dat)
+			moveFileToFolder(data, dat);
+			document.getElementById("fileinfobn").innerHTML = "Done";
 		}
 
 		function fillDropup(folderPath, silly = false) {
@@ -1681,7 +1698,8 @@
 				return;
 			}
 
-			document.getElementById("fileinfobn").innerHTML = filesInFolder.length + " items";
+			document.getElementById("fileinfobn").innerHTML = filesInFolder.length + " " + ((filesInFolder.length == 1) ? "item" : "items");
+			// sort files
 			let sortedFiles = [...filesInFolder];
 			switch (currentSort) {
 				case "time_asc":
@@ -1713,6 +1731,7 @@
 			}
 
 			if (!gen) {
+				// load from cache
 				const previousFiles = cachedFiles[currentPath] || [];
 				const currentFileNames = new Set(sortedFiles.map(f => f.name));
 				const removedFiles = previousFiles.filter(f => !currentFileNames.has(f.name));

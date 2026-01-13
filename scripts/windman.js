@@ -315,6 +315,7 @@ function resetWindow(id) {
     }, 1000);
 }
 
+
 function maximizeWindow(id) {
     updateNavSize();
     const x = document.getElementById("window" + id);
@@ -333,7 +334,6 @@ function maximizeWindow(id) {
         suppressNudge = false;
     }, 1000);
 }
-
 let suppressNudge = false;
 function nudgeWindowIntoView(el) {
     if (suppressNudge || !sessionSettings.keepvisible) return;
@@ -432,7 +432,7 @@ async function checksnapping(x, event, winuid) {
         } else if ((logData.viewportWidth - logData.cursorX) < VWInPixels) {
             suppressNudge = true;
             x.classList.add("snapping");
-            x.style = `right: 0; top: 0; width: calc(50% - 0px); height: calc(100% - ${navheight}px);`;
+            x.style = `left:50vw; top: 0; width: calc(50% - 0px); height: calc(100% - ${navheight}px);`;
             x.getElementsByClassName("flbtn")[0].innerHTML = "open_in_full";
             winds[winuid]["visualState"] = "snapped";
             setTimeout(() => {
