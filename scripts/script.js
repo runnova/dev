@@ -258,9 +258,9 @@ async function startup() {
 
 			rllog(
 				`You are using \n\n%cNovaOS%c\n%cNovaOS is the web system made for you.%c\n\nStartup: ${(end - start).toFixed(2)}ms\nUsername: ${CurrentUsername}\n12hr Time format: ${timetypecondition}`,
-				'color: white; background-color: #101010; font-size: 2rem; padding: 0.7rem 1rem; border-radius: 1rem;',
+				'color: white; background-color: #101010; font-size: 2em; padding: 0.7rem 1em; border-radius: 1em;',
 				'',
-				'padding:5px 0; padding-top:1rem;',
+				'padding:5px 0; padding-top:1em;',
 				'color: lightgreen; font-size:70%;'
 			);
 
@@ -1236,14 +1236,14 @@ async function initializeOS() {
 	dbCache = null;
 	cryptoKeyCache = null;
 	await say(`
-		<h2>This is an open source system</h2>
+		<h2 style="margin: 0">This is an open source system</h2>
 		<p style="">NovaOS uses several browser APIs to store, manage and display data.
 		</p>
-		<div style="background:: #001b00; color: lightgreen; padding: 0.8rem; border: 1px solid #254625;font-size:inherit; border-radius: .5rem; margin: 0rem 0; display: flex;flex-direction:row; align-items: center; justify-content: flex-start;gap:0.5rem;">
+		<div style="background:: #001b00; color: lightgreen; padding: 0.8em; border: 1px solid #254625;font-size:inherit; border-radius: .5em; margin: 0rem 0; display: flex;flex-direction:row; align-items: center; justify-content: flex-start;gap:0.5em;">
 			<span class="material-symbols-rounded">check</span>
 			<div>We do not store or share your personal information.</div>
 		</div>
-	`);
+	`, "success");
 	console.log("Setting Up NovaOS\n\nUsername: " + CurrentUsername + "\nWith: Sample preset\nUsing host: " + location.href)
 	initialization = true
 	memory = {
@@ -1491,7 +1491,7 @@ async function rlstrtappse(event) {
 	}
 
 	if (elements == 0) {
-		gid("strtappsugs").innerHTML = `<p style="margin:1rem; opacity: 0.5;">No results</p>`;
+		gid("strtappsugs").innerHTML = `<p style="margin:1em; opacity: 0.5;">No results</p>`;
 	}
 
 }

@@ -48,8 +48,7 @@
 			height: fit-content;
 			flex-direction: row;
 			flex-wrap: nowrap;
-			padding: 3px;
-			padding-bottom: 0;
+			padding: 0 3px;
 			z-index: 99;
 		}
 
@@ -80,13 +79,13 @@
 			align-items: center;
 			overflow: visible;
 			border-radius: var(--siz-radius1);
-			margin: 0.1rem;
+			margin: 0.1em;
 		}
 
 		.navbfobtns {
 			width: fit-content;
 			flex: 0;
-			margin: 1rem;
+			margin: 1em;
 		}
 
 		.navinfobtns:active {
@@ -96,7 +95,7 @@
 		[flap-sidenav] {
 			width: 0;
 			overflow-y: auto;
-			min-width: 120px;
+			min-width: 190px;
 			background-color: var(--col-bg2);
 			border: 1px solid #ffffff0c;
 			color: var(--colors-text-section);
@@ -105,7 +104,7 @@
 			transition: .3s;
 			border-radius: var(--siz-radius1);
 			overflow-x: hidden;
-			height: calc(100vh - 52px);
+			height: calc(100% - 7.5px);
 		}
 
 		[flap-sidenav] small {
@@ -123,7 +122,7 @@
 		.themainstuff {
 			margin: 3px 5px;
 			display: flex;
-			width: calc(100% - 5px);
+			height: 100%;
 			height: 100%;
 			position: relative;
 		}
@@ -133,7 +132,7 @@
 			cursor: ew-resize;
 			border-radius: 0 5px 5px 0;
 			height: 90%;
-			margin-top: 0;
+			margin: auto 0;
 			background: var(--col-bgh);
 			opacity: 0;
 			transition: .3s;
@@ -147,7 +146,7 @@
 		[flap-fl-topnav] {
 			display: flex;
 			margin: 0rem 5px;
-			margin-bottom: 0.1rem;
+			margin-bottom: 0.1em;
 			opacity: 70%;
 			flex-direction: row;
 			background-color: var(--col-bg2);
@@ -185,12 +184,16 @@
 
 		.file[list] {
 			display: flex;
-			padding: 0.1rem 0.5rem;
-			margin-bottom: 0.2rem;
+			padding: 0.1rem 0.5em;
+			margin-bottom: 0.2em;
 			flex-direction: row;
 			flex-wrap: nowrap;
 			align-items: center;
 			justify-content: flex-start;
+
+			&:nth-child(odd) {
+				filter: brightness(110%);
+			}
 		}
 
 		.file[list] .flfrname {
@@ -207,7 +210,7 @@
 			width: auto;
 			margin: 5px;
 			transition: .3s;
-			padding: 1rem;
+			padding: 1em;
 		}
 
 		.file[grid] .flfrname {
@@ -264,7 +267,7 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 			text-align: end;
-			margin-left: 0.2rem;
+			margin-left: 0.2em;
 		}
 
 		@keyframes rotate {
@@ -357,6 +360,8 @@
 			background: var(--col-bg3);
 			color: var(--colors-text-sub);
 			cursor: pointer;
+			box-shadow: 0 0 4em #000000ab;
+			z-index: 3;
 		}
 
 		#slfile[grid] [flname] {
@@ -542,11 +547,11 @@
 			text-overflow: ellipsis;
 			align-items: center;
 			opacity: 0.7;
-			font-size: 14px;
-			padding: .5em .7em;
+			padding: 0.5em;
 			gap: 5px;
 			position: relative;
 			width: fit-content;
+			margin-right: 5px;
 
 			&:hover>.dropup-content.nested {
 				display: flex;
@@ -638,7 +643,7 @@
 		}
 
 		.newfoldbtn span {
-			font-size: 1rem;
+			font-size: 1em;
 			margin: 4px;
 		}
 
@@ -666,7 +671,7 @@
 			aspect-ratio: 1/1;
 			width: 100%;
 			height: 100%;
-			max-width: 2rem;
+			max-width: 2em;
 		}
 
 		#jstree {
@@ -678,7 +683,7 @@
 		}
 
 		.subdir {
-			padding: 5px .5em;
+			padding: .5em;
 			background: var(--col-bg2);
 			margin-bottom: 1px;
 			min-width: 6em;
@@ -695,12 +700,13 @@
 
 			button.toggle {
 				color: inherit;
-				background-color: transparent;
+				background-color: #76767657;
 				padding: 0;
 				border: 0;
-				border-radius: 0;
-				opacity: .5;
-				font-size: 15px;
+				font-size: inherit;
+				border-radius: 1em;
+				opacity: 1;
+				margin-left: .5em;
 			}
 
 			&>.material-symbols-rounded {
@@ -717,7 +723,7 @@
 			flex: 1;
 			overflow-x: hidden;
 			text-overflow: ellipsis;
-			margin: 0 0.5rem;
+			margin: 0 0.5em;
 			display: flex;
 			user-select: text;
 			-moz-user-select: text;
@@ -749,7 +755,7 @@
 
 		.extraFunctionUI {
 			display: flex;
-			margin: 0.3rem;
+			margin: 0.3em;
 			gap: 3px;
 			border-radius: var(--siz-radius1);
 			overflow: hidden;
@@ -759,7 +765,7 @@
 			&>input {
 				flex: 1;
 				padding: 0.5em;
-				font-size: 1em;
+				font-size: inherit;
 				font-family: inherit;
 				color: white;
 				border-radius: 0;
@@ -1059,15 +1065,15 @@
 			max-height: 80vh;
 			min-width: 300px;
 			width: 40%;
-			padding: 1rem 0rem;
-			padding-top: 0.7rem;
+			padding: 1rem 0em;
+			padding-top: 0.7em;
 			border: none;
 			background-color: var(--col-bg2);
 			border: 1px solid #ffffff0c;
 			color: var(--colors-text-section);
 			border-radius: var(--siz-radius1);
 			box-shadow: 0 0 10px #00000057;
-			padding: 1rem;
+			padding: 1em;
 		}
 
 		.classydialog input,
@@ -1086,7 +1092,7 @@
 		.classydialog label {
 			font-weight: normal;
 			opacity: 0.8;
-			margin-bottom: 0.3rem;
+			margin-bottom: 0.3em;
 			display: block;
 		}
 
@@ -1110,8 +1116,8 @@
 		.btncont {
 			display: flex;
 			flex-direction: row;
-			gap: 0.5rem;
-			margin-top: 0.5rem;
+			gap: 0.5em;
+			margin-top: 0.5em;
 		}
 
 		.btncont button {
@@ -1129,10 +1135,10 @@
 		#makefiledivno {
 			color: var(--col-bad);
 			opacity: 1;
-			font-size: 0.8rem;
-			line-height: 1.2rem;
+			font-size: 0.8em;
+			line-height: 1.2em;
 			display: block;
-			margin: 0.5rem 0rem;
+			margin: 0.5rem 0em;
 		}
 
 		#makefiledivno .material-symbols-rounded {
@@ -1144,7 +1150,7 @@
 		.loader33 {
 			width: 5px;
 			height: 3px;
-			border-radius: 1rem;
+			border-radius: 1em;
 			display: block;
 			margin: 15px auto;
 			position: relative;
@@ -1359,6 +1365,7 @@
 			if (fname.length > 1) {
 				await window.parent.createFolder(currentPath + fname);
 				document.getElementById('makefoldia').close();
+				refresh();
 				window.parent.toast("Folder created!");
 			} else {
 				window.parent.toast("Folder names can't be that short.");
@@ -1372,7 +1379,7 @@
 		var sessiontype = "normal", sessionreturnreqid = null;
 
 		function fitsizesidenav() {
-			document.getElementById("flap-sidenav").style.width = `165px`
+			document.getElementById("flap-sidenav").style.width = "fit-content";
 		}
 		async function initializeFilesApp(defaultopenfold = false, method = undefined) {
 			var dropZone = document.getElementById("flap-mot");
@@ -1473,167 +1480,307 @@
 			moveFileToFolder(data, dat);
 			document.getElementById("fileinfobn").innerHTML = "Done";
 		}
+		async function renderActions(container, actions, ctx) {
+			container.innerHTML = "";
+			const root = document.createElement("div");
+			root.className = "dropup-content";
+			container.appendChild(root);
 
-		function fillDropup(folderPath, silly = false) {
-			const dropupDiv = document.getElementById("filetools");
-			dropupDiv.innerHTML = "";
-			const dropupContentDiv = document.createElement("div");
-			dropupContentDiv.className = "dropup-content";
+			for (const group of Object.values(actions)) {
+				for (const a of Object.values(group)) {
+					if (!a.special) continue;
+					if (!a.condition || await a.condition(ctx.file)) {
+						const el = document.createElement("a");
+						el.className = "dropdownerthebob";
+						el.title = a.label;
+						el.onclick = () => a.action(ctx.id);
+						el.innerHTML = `<span class="material-symbols-rounded" style="color:${a.icon_color || ""}">${a.icon}</span> <b>${a.label}</b>`;
+						root.appendChild(el);
+					}
+				}
+			}
+
+			for (const [groupName, group] of Object.entries(actions)) {
+				const normal = Object.values(group).filter(a => !a.special);
+				if (!normal.length) continue;
+
+				const toggle = document.createElement("a");
+				toggle.className = "dropdownerthebob";
+				toggle.innerHTML = `<span class="material-symbols-rounded droptglbtn">expand_more</span> <b>${groupName}</b>`;
+
+				const menu = document.createElement("div");
+				menu.className = "dropup-content nested";
+				toggle.appendChild(menu);
+				root.appendChild(toggle);
+
+				for (const a of normal) {
+					if (!a.condition || await a.condition(ctx.file)) {
+						const el = document.createElement("a");
+						el.className = "dropdownerthebob";
+						el.title = a.label;
+						el.onclick = () => a.action(ctx.id);
+						el.innerHTML = `<span class="material-symbols-rounded" style="color:${a.icon_color || ""}">${a.icon}</span> <b>${a.label}</b>`;
+						menu.appendChild(el);
+					}
+				}
+			}
+		}
+
+
+		async function fillDropup(folderPath, silly = false) {
+			const dropup = document.getElementById("filetools");
+
 			const pathSegments = folderPath.split('/').filter(Boolean);
 			const isSystemFolder = folderPath === "System/" || folderPath === "";
 			const isRootLevel = pathSegments.length <= 1;
 
-			const groups = {
-				folder: [
-					{
-						id: "createFolder",
-						title: "Create folder",
-						onclick: () => {
+			const actions = {
+				folder: {
+					create: {
+						label: "Folder",
+						icon: "add",
+						special: true,
+						action: () => {
 							document.getElementById("make_fold_pre_path").innerText = folderPath;
-							document.getElementById('makefoldia').showModal();
-						},
-						icon: "add",
-						label: "Folder"
+							document.getElementById("makefoldia").showModal();
+						}
 					},
-					{
-						id: "deleteFolder",
-						title: "Delete folder",
-						onclick: isSystemFolder ? (e) => e.preventDefault() : remfold,
-						icon: "delete",
+					delete: {
 						label: "Delete",
-						disabled: isSystemFolder
+						icon: "delete",
+						disabled: isSystemFolder,
+						action: () => remfold(),
+						condition: () => !isSystemFolder
 					},
-					{
-						id: "parentFolder",
-						title: "Parent folder",
-						onclick: () => {
-							if (!isRootLevel) {
-								const parentPath = folderPath.substring(0, folderPath.lastIndexOf('/', folderPath.lastIndexOf('/') - 1) + 1);
-								listFiles(parentPath);
-							}
-						},
-						icon: "keyboard_return",
+					parent: {
 						label: "Parent",
-						disabled: isRootLevel
-					},
-					{
-						id: "zipFolder",
-						title: "Zip this folder",
-						onclick: async () => {
-							console.log(453, folderPath)
-							let zipped = await window.parent.zipFolder(folderPath);
-							let tmpflpth = folderPath.endsWith('/') ? folderPath.slice(0, -1) : folderPath
-							let toBeSavedToData = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'saveas', "value": tmpflpth + ".zip" });
-							await ntxSession.send("fileSet.createFile", toBeSavedToData.path, toBeSavedToData.name, false, zipped);
+						icon: "keyboard_return",
+						disabled: isRootLevel,
+						action: () => {
+							const p = folderPath.substring(0, folderPath.lastIndexOf('/', folderPath.lastIndexOf('/') - 1) + 1);
+							listFiles(p);
 						},
+						condition: () => !isRootLevel,
+						special: true,
+					},
+					zip: {
+						label: "Zip",
 						icon: "folder_zip",
-						label: "Zip"
+						action: async () => {
+							const zipped = await window.parent.zipFolder(folderPath);
+							const base = folderPath.endsWith("/") ? folderPath.slice(0, -1) : folderPath;
+							const save = await ntxSession.send("olp.useHandler", "Files@runnova", { opener: "saveas", value: base + ".zip" });
+							await ntxSession.send("fileSet.createFile", save.path, save.name, false, zipped);
+						}
 					}
-				],
-				files: [
-					{
-						id: "search",
-						title: "Search files",
-						onclick: window.parent.opensearchpanel,
+				},
+				files: {
+					search: {
+						label: "Search",
 						icon: "search",
-						label: "Search"
+						action: window.parent.opensearchpanel
 					},
-					{
-						id: "createFile",
-						title: "Create File",
-						onclick: () => document.getElementById('makefiledia').showModal(),
+					create: {
+						label: "New File",
 						icon: "add",
-						label: "New File"
+						action: () => document.getElementById("makefiledia").showModal()
 					}
-				],
-				view: [
-					{
-						id: "toggleView",
-						title: flmode === 'grid' ? 'List view' : 'Grid view',
-						onclick: function () {
-							flmode = flmode === 'grid' ? 'list' : 'grid';
+				},
+				view: {
+					view: {
+						label: flmode === "grid" ? "List View" : "Grid View",
+						icon: flmode === "grid" ? "view_list" : "grid_view",
+						special: true,
+						action: function () {
+							flmode = flmode === "grid" ? "list" : "grid";
 							changeview(flmode);
-							this.title = flmode === 'grid' ? 'List view' : 'Grid view';
-							this.innerHTML = flmode === 'grid'
-								? `<span class="material-symbols-rounded">view_list</span> <b>List View</b>`
-								: `<span class="material-symbols-rounded">grid_view</span> <b>Grid View</b>`;
-						},
-						icon: flmode === 'grid' ? 'view_list' : 'grid_view',
-						label: flmode === 'grid' ? 'List View' : 'Grid View'
+						}
 					},
-					{
-						id: "toggleSort",
-						title: "Sort files",
-						onclick: async function () {
-							const options = [
-								{ label: "Oldest first", mode: "time_asc", icon: "schedule" },
-								{ label: "Newest first", mode: "time_desc", icon: "schedule" },
-								{ label: "Name A-Z", mode: "name_asc", icon: "sort_by_alpha" },
-								{ label: "Name Z-A", mode: "name_desc", icon: "sort_by_alpha" },
-								{ label: "File type", mode: "type", icon: "category" }
+					sort: {
+						label: "Sort files",
+						special: true,
+						icon: "sort",
+						action: async () => {
+							const opts = [
+								{ l: "Oldest first", m: "time_asc" },
+								{ l: "Newest first", m: "time_desc" },
+								{ l: "Name A-Z", m: "name_asc" },
+								{ l: "Name Z-A", m: "name_desc" },
+								{ l: "File type", m: "type" }
 							];
-							const selected = await window.parent.showDropdownModal(
-								"Sort files",
-								"Choose a sorting method:",
-								options.map(o => o.label)
-							);
-							const choice = options.find(o => o.label === selected);
-							if (choice) {
-								currentSort = choice.mode;
-								this.title = `Sort: ${choice.label}`;
-								this.innerHTML = `<span class="material-symbols-rounded">${choice.icon}</span> <b>${choice.label}</b>`;
-							}
+							const sel = await window.parent.showDropdownModal("Sort files", "Choose a sorting method:", opts.map(o => o.l));
+							const hit = opts.find(o => o.l === sel);
+							if (hit) currentSort = hit.m;
 							listFiles();
-						},
-						icon: (() => {
-							const mapping = {
-								time_asc: "schedule",
-								time_desc: "schedule",
-								name_asc: "sort_by_alpha",
-								name_desc: "sort_by_alpha",
-								type: "category"
-							};
-							return mapping[currentSort] || "sort";
-						})(),
-						label: (() => {
-							const mapping = {
-								time_asc: "Oldest first",
-								time_desc: "Newest first",
-								name_asc: "Name A-Z",
-								name_desc: "Name Z-A",
-								type: "File type"
-							};
-							return mapping[currentSort] || "Sort files";
-						})()
+						}
 					}
-				]
+				}
 			};
 
-			for (const [groupName, group] of Object.entries(groups)) {
-				const groupToggle = document.createElement("a");
-				groupToggle.classList.add("dropdownerthebob");
-				groupToggle.innerHTML = `<span class="material-symbols-rounded droptglbtn">expand_more</span> <b>${groupName}</b>`;
-				const groupMenu = document.createElement("div");
-				groupMenu.className = "dropup-content nested";
-				groupToggle.appendChild(groupMenu);
-				dropupContentDiv.appendChild(groupToggle);
-				for (const { id, title, onclick, icon, label, disabled } of group) {
-					const link = document.createElement("a");
-					link.classList.add("dropdownerthebob");
-					link.title = title;
-					link.onclick = onclick;
-					link.innerHTML = `<span class="material-symbols-rounded">${icon}</span> <b>${label}</b>`;
-					link.id = `topbarAction-${id}`;
-					if (disabled) link.classList.add("disabled");
-					groupMenu.appendChild(link);
-				}
-			}
+			await renderActions(dropup, actions, folderPath);
 
-			dropupDiv.appendChild(dropupContentDiv);
 			if (!silly) {
 				currentPath = folderPath;
 				updpth();
 			}
+		}
+		async function populateFileActions(fileData) {
+			if (sessiontype === "opener") return;
+
+			const tools = document.getElementById("filetools");
+			const more = document.getElementById("moretoolsdropdwn");
+
+			tools.innerHTML = "";
+			more.innerHTML = "";
+
+			if (selectedFiles.length > 1) {
+				const box = document.createElement("div");
+				box.className = "dropup-content";
+				const del = document.createElement("a");
+				del.className = "dropdownerthebob";
+				del.innerHTML = `<span class="material-symbols-rounded" style="color:#ffb3ba;">delete</span> <b>Delete All</b>`;
+				del.onclick = () => deleteFiles(selectedFiles);
+				box.appendChild(del);
+				tools.appendChild(box);
+				document.getElementById("fileinfobn").innerHTML = "Selected " + selectedFiles.length + " files";
+				return;
+			}
+
+			await renderActions(tools, fileActions, {
+				file: fileData,
+				id: fileData.id
+			});
+		}
+
+		window.fileActions = {
+			file: {
+				folder: {
+					icon: 'close',
+					label: 'Cancel',
+					action: (itemuid) => refresh(),
+					condition: (file) => true,
+					special: true
+				},
+				delete: {
+					icon: 'delete',
+					icon_color: '#ffb3ba',
+					label: 'Delete',
+					action: (itemuid) => remfile(itemuid),
+					condition: (file) => true,
+					special: true
+				},
+				rename: {
+					icon: 'save_as',
+					icon_color: '#bae1ff',
+					label: 'Rename',
+					action: async (itemuid) => {
+						let file = await ntxSession.send("fileGet.byId", itemuid)
+						file.fileName = await ntxSession.send("sysUI.ask", "New Name:", file.fileName)
+						await window.parent.updateFile(false, itemuid, file)
+					},
+					condition: (file) => true,
+				},
+				move: {
+					icon: 'drive_file_move',
+					icon_color: '#baffc9',
+					label: 'Move',
+					action: (itemuid) => movefile(itemuid),
+					condition: (file) => true,
+				},
+			},
+			open: {
+				open: {
+					icon: 'open_in_new',
+					icon_color: '#fff3b0',
+					label: 'Open',
+					action: (itemuid) => openfile(itemuid),
+					condition: (file) => true,
+				},
+				openWith: {
+					icon: 'open_with',
+					icon_color: '#d5b3ff',
+					label: 'Open With',
+					action: (itemuid) => openfile(itemuid, 'any'),
+					condition: (file) => true,
+				},
+				openAsText: {
+					icon: 'article_shortcut',
+					icon_color: '#ffdfba',
+					label: 'Open as text',
+					action: (itemuid) => openfile(itemuid, 'text'),
+					condition: (file) => true,
+				},
+			},
+			more: {
+				reinstall: {
+					icon: 'download',
+					icon_color: '#caffbf',
+					label: 'Reinstall',
+					action: (itemuid) => window.parent.extractAndRegisterCapabilities(itemuid),
+					condition: (file) => getFileExtension(file.fileName) === 'app',
+					special: true
+				},
+				setWallpaper: {
+					icon: 'wallpaper',
+					icon_color: '#ffd6a5',
+					label: 'Set As Wallpaper',
+					action: (itemuid) => window.parent.makewall(itemuid),
+					condition: async (file) => (await ntxSession.send("utility.getBaseFileType", getFileExtension(file.fileName))) === 'image',
+					special: true
+				},
+				exportFile: {
+					icon: 'file_save',
+					icon_color: '#b5ead7',
+					label: 'Export file',
+					action: async (itemuid) => {
+						let file = await ntxSession.send("fileGet.byId", itemuid)
+						let [meta, b64] = file.content.split(',')
+						let mime = meta.match(/:(.*?);/)[1]
+						let binary = atob(b64)
+						let len = binary.length
+						let bytes = new Uint8Array(len)
+						for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i)
+						let blob = new Blob([bytes], { type: mime })
+						let url = URL.createObjectURL(blob)
+						let link = document.createElement("a")
+						link.href = url
+						link.download = file.fileName
+						document.body.appendChild(link)
+						link.click()
+						document.body.removeChild(link)
+						URL.revokeObjectURL(url)
+					},
+					condition: (file) => true,
+				},
+				copyId: {
+					icon: 'content_copy',
+					icon_color: '#b5ead7',
+					label: 'Copy ID',
+					action: (itemuid) => {
+						window.parent.navigator.clipboard.writeText(itemuid)
+					},
+					condition: (file) => true,
+				},
+				createShortcut: {
+					icon: 'add',
+					icon_color: '#ffb3ba',
+					label: 'Shortcut',
+					action: (itemuid) => addShortcut(itemuid),
+					condition: (file) => true,
+				},
+				unZip: {
+					icon: 'unarchive',
+					icon_color: '#b5ead7',
+					label: 'Unzip',
+					action: async (itemuid) => {
+						let file = await ntxSession.send("fileGet.byId", itemuid)
+						let toBeSavedToData = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'directory' });
+						await window.parent.unzipToFolder(toBeSavedToData + file.fileName, file.content);
+					},
+					condition: (file) => getFileExtension(file.fileName) == "zip",
+					special: true
+				},
+			},
 		}
 
 		async function refresh() {
@@ -1969,59 +2116,6 @@
 
 			return `${size.toFixed(2)} ${units[index]}`;
 		}
-		async function populateFileActions(fileData) {
-			if (sessiontype === "opener") return;
-			const toolsContainer = document.getElementById("filetools");
-			const moreToolsContainer = document.getElementById("moretoolsdropdwn");
-			toolsContainer.innerHTML = "";
-			moreToolsContainer.innerHTML = "";
-			const contentDiv = document.createElement("div");
-			contentDiv.className = "dropup-content";
-			toolsContainer.appendChild(contentDiv);
-			if (selectedFiles.length > 1) {
-				const deleteAll = document.createElement("a");
-				deleteAll.className = "dropdownerthebob";
-				deleteAll.innerHTML = `<span class="material-symbols-rounded" style="color:#ffb3ba;">delete</span> <b>Delete All</b>`;
-				deleteAll.onclick = () => deleteFiles(selectedFiles);
-				contentDiv.appendChild(deleteAll);
-				document.getElementById("fileinfobn").innerHTML = "Selected " + selectedFiles.length + " files";
-				return;
-			}
-			for (const [groupName, group] of Object.entries(fileActions)) {
-				for (const action of Object.values(group)) {
-					if (action.special && await action.condition(fileData)) {
-						const option = document.createElement("a");
-						option.classList.add("dropdownerthebob");
-						option.title = action.label;
-						option.onclick = () => action.action(fileData.id);
-						option.innerHTML = `<span class="material-symbols-rounded" style="color:${action.icon_color};">${action.icon}</span> <b>${action.label}</b>`;
-						contentDiv.appendChild(option);
-					}
-				}
-			}
-			for (const [groupName, group] of Object.entries(fileActions)) {
-				const groupActions = Object.values(group).filter(a => !a.special);
-				if (!groupActions.length) continue;
-				const groupToggle = document.createElement("a");
-				groupToggle.classList.add("dropdownerthebob");
-				groupToggle.innerHTML = `<span class="material-symbols-rounded droptglbtn">expand_more</span> <b>${groupName}</b>`;
-				const groupMenu = document.createElement("div");
-				groupMenu.className = "dropup-content nested";
-				groupToggle.appendChild(groupMenu);
-				contentDiv.appendChild(groupToggle);
-				for (const action of groupActions) {
-					if (await action.condition(fileData)) {
-						const option = document.createElement("a");
-						option.classList.add("dropdownerthebob");
-						option.title = action.label;
-						option.onclick = () => action.action(fileData.id);
-						option.innerHTML = `<span class="material-symbols-rounded" style="color:${action.icon_color};">${action.icon}</span> <b>${action.label}</b>`;
-						groupMenu.appendChild(option);
-					}
-				}
-			}
-		}
-
 
 		var isitBulkRemfile = false;
 		async function remfile(ID) {
@@ -2364,136 +2458,6 @@
 			let file = await ntxSession.send("fileGet.byId", slfileID);
 			await window.parent.createFile(currentPath, file.fileName, false, file.content, file.metadata || {});
 
-		}
-		window.fileActions = {
-			file: {
-				folder: {
-					icon: 'close',
-					label: 'Cancel',
-					action: (itemuid) => refresh(),
-					condition: (file) => true,
-					special: true
-				},
-				delete: {
-					icon: 'delete',
-					icon_color: '#ffb3ba',
-					label: 'Delete',
-					action: (itemuid) => remfile(itemuid),
-					condition: (file) => true,
-					special: true
-				},
-				rename: {
-					icon: 'save_as',
-					icon_color: '#bae1ff',
-					label: 'Rename',
-					action: async (itemuid) => {
-						let file = await ntxSession.send("fileGet.byId", itemuid)
-						file.fileName = await ntxSession.send("sysUI.ask", "New Name:", file.fileName)
-						await window.parent.updateFile(false, itemuid, file)
-					},
-					condition: (file) => true,
-				},
-				move: {
-					icon: 'drive_file_move',
-					icon_color: '#baffc9',
-					label: 'Move',
-					action: (itemuid) => movefile(itemuid),
-					condition: (file) => true,
-				},
-			},
-			open: {
-				open: {
-					icon: 'open_in_new',
-					icon_color: '#fff3b0',
-					label: 'Open',
-					action: (itemuid) => openfile(itemuid),
-					condition: (file) => true,
-				},
-				openWith: {
-					icon: 'open_with',
-					icon_color: '#d5b3ff',
-					label: 'Open With',
-					action: (itemuid) => openfile(itemuid, 'any'),
-					condition: (file) => true,
-				},
-				openAsText: {
-					icon: 'article_shortcut',
-					icon_color: '#ffdfba',
-					label: 'Open as text',
-					action: (itemuid) => openfile(itemuid, 'text'),
-					condition: (file) => true,
-				},
-			},
-			more: {
-				reinstall: {
-					icon: 'download',
-					icon_color: '#caffbf',
-					label: 'Reinstall',
-					action: (itemuid) => window.parent.extractAndRegisterCapabilities(itemuid),
-					condition: (file) => getFileExtension(file.fileName) === 'app',
-					special: true
-				},
-				setWallpaper: {
-					icon: 'wallpaper',
-					icon_color: '#ffd6a5',
-					label: 'Set As Wallpaper',
-					action: (itemuid) => window.parent.makewall(itemuid),
-					condition: async (file) => (await ntxSession.send("utility.getBaseFileType", getFileExtension(file.fileName))) === 'image',
-					special: true
-				},
-				exportFile: {
-					icon: 'file_save',
-					icon_color: '#b5ead7',
-					label: 'Export file',
-					action: async (itemuid) => {
-						let file = await ntxSession.send("fileGet.byId", itemuid)
-						let [meta, b64] = file.content.split(',')
-						let mime = meta.match(/:(.*?);/)[1]
-						let binary = atob(b64)
-						let len = binary.length
-						let bytes = new Uint8Array(len)
-						for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i)
-						let blob = new Blob([bytes], { type: mime })
-						let url = URL.createObjectURL(blob)
-						let link = document.createElement("a")
-						link.href = url
-						link.download = file.fileName
-						document.body.appendChild(link)
-						link.click()
-						document.body.removeChild(link)
-						URL.revokeObjectURL(url)
-					},
-					condition: (file) => true,
-				},
-				copyId: {
-					icon: 'content_copy',
-					icon_color: '#b5ead7',
-					label: 'Copy ID',
-					action: (itemuid) => {
-						window.parent.navigator.clipboard.writeText(itemuid)
-					},
-					condition: (file) => true,
-				},
-				createShortcut: {
-					icon: 'add',
-					icon_color: '#ffb3ba',
-					label: 'Shortcut',
-					action: (itemuid) => addShortcut(itemuid),
-					condition: (file) => true,
-				},
-				unZip: {
-					icon: 'unarchive',
-					icon_color: '#b5ead7',
-					label: 'Unzip',
-					action: async (itemuid) => {
-						let file = await ntxSession.send("fileGet.byId", itemuid)
-						let toBeSavedToData = await ntxSession.send("olp.useHandler", "Files@runnova", { "opener": 'directory' });
-						await window.parent.unzipToFolder(toBeSavedToData + file.fileName, file.content);
-					},
-					condition: (file) => getFileExtension(file.fileName) == "zip",
-					special: true
-				},
-			},
 		}
 
 		async function getMenuItems(target) {

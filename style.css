@@ -120,7 +120,6 @@ nav .flodiv {
 }
 
 nav [navobj] {
-	padding: 3px;
 	border-radius: var(--siz-radius1);
 	background-color: var(--col-bg1);
 	display: flex;
@@ -130,7 +129,7 @@ nav [navobj] {
 	flex-direction: row;
 	transition: flex-basis var(----time1), width var(----time1), opacity var(----time1);
 	width: fit-content;
-	min-width: 1.8rem;
+	min-width: 1.8em;
 }
 
 .navmalobj {
@@ -254,8 +253,8 @@ nav [navobj] {
 }
 
 .windowloader svg {
-	height: 4rem;
-	width: 4rem;
+	height: 4em;
+	width: 4em;
 }
 
 .windowcontent iframe {
@@ -269,7 +268,7 @@ nav [navobj] {
 	border-radius: var(--siz-radius1);
 	padding: 10px;
 	cursor: pointer;
-	width: 70px;
+    width: 90px;
 	animation: pop var(--time1);
 	display: inline-block;
 	border: 1px solid transparent;
@@ -300,8 +299,8 @@ nav [navobj] {
 }
 
 .app-shortcut span svg {
-	width: 29px;
-	height: 29px;
+    width: 2.2em;
+    height: 2.2em;
 	animation: pop var(--time2);
 	overflow: hidden;
 }
@@ -340,7 +339,7 @@ nav [navobj] {
 }
 
 .app-shortcut .appname {
-	margin-top: 0.5rem;
+	margin-top: 0.5em;
 	color: var(--col-txt1);
 	display: block;
 	border-radius: var(--siz-radius1);
@@ -349,7 +348,7 @@ nav [navobj] {
 	overflow: hidden;
 	white-space: nowrap;
 	text-align: center;
-	padding: 0.1rem 0.5rem;
+	padding: 0.1rem 0.5em;
 	background: var(--col-bg1)42;
 	max-width: 67px;
 	text-transform: capitalize;
@@ -375,20 +374,14 @@ nav [navobj] {
 }
 
 #appdmod {
-	padding: 5px;
-	margin-bottom: 60px;
-	padding-bottom: 1.2rem;
-	background-color: var(--col-bg1);
-	border: 1px solid #ffffff0c;
-
-	& h1 {
-		font-weight: normal;
-		opacity: .7;
-	}
+    margin-bottom: 3.8em;
+    background-color: var(--col-bg1);
+    border: 1px solid #ffffff0c;
+    padding: 1em .3em;
 }
 
 #searchwindow {
-	padding: 0.7rem;
+	padding: 0.7em;
 	margin-bottom: 60px;
 	background-color: var(--col-bg1);
 	border: 1px solid #ffffff0c;
@@ -538,7 +531,7 @@ nav [navobj] {
 	background: var(--col-bgh);
 	color: var(--col-txth);
 	border-radius: var(--siz-radius2);
-	padding: 0.5rem;
+	padding: 0.5em;
 	outline: none;
 	display: block;
 	width: 100%;
@@ -656,9 +649,9 @@ nav [navobj] {
 	height: auto;
 
 	& svg {
-		width: 17px;
-		height: 20px;
-		margin-right: 0.3rem;
+    width: 2.2em;
+    height: 2.2em;
+		margin-right: 0.3em;
 	}
 
 	& div {
@@ -716,11 +709,11 @@ nav [navobj] {
 	text-align: left;
 	display: grid;
 	width: calc(100% - 1rem);
-	grid-template-columns: repeat(auto-fill, minmax(80px, 85px));
+    grid-template-columns: repeat(auto-fill, minmax(75px, 95px));
 	justify-items: center;
 	justify-content: space-around;
 	align-items: start;
-	padding: 0 0.5rem;
+	padding: 0 0.5em;
 }
 
 .notifbtn {
@@ -800,7 +793,7 @@ nav [navobj] {
 	color: var(--col-txt1);
 	word-break: normal;
 	text-align: center;
-	border-radius: 0.3rem;
+	border-radius: 0.3em;
 	padding: 2px;
 	position: absolute;
 	z-index: 1;
@@ -821,14 +814,14 @@ nav [navobj] {
 	width: 80%;
 	max-width: 400px;
 	height: fit-content;
-	padding: 1rem;
+	padding: 1em;
 	border: none;
 	background: var(--col-bg1);
 	text-align: center;
 	color: var(--col-txt1);
 	border-radius: var(--siz-radius1);
 	box-shadow: 0 5px 1rem black;
-	padding-top: 2rem;
+	padding-top: 2em;
 	animation: appshow .5s;
 }
 
@@ -840,17 +833,17 @@ nav [navobj] {
 
 #bios span.material-symbols-rounded.closebtn {
 	position: absolute;
-	left: 1rem;
-	top: 1rem;
+	left: 1em;
+	top: 1em;
 	background-color: var(--col-bg3);
 	border-radius: 50%;
-	padding: 0.3rem;
-	font-size: 0.8rem;
+	padding: 0.3em;
+	font-size: 0.8em;
 }
 
 #bios h1 {
 	margin: 0;
-	margin-bottom: 1rem;
+	margin-bottom: 1em;
 }
 
 #bios .buttongroup-grid {
@@ -885,7 +878,7 @@ nav [navobj] {
 #bios button .material-symbols-rounded {
 	display: block;
 	margin: 7px;
-	font-size: 1.5rem;
+	font-size: 1.5em;
 	opacity: 0.7;
 	transition: var(----time1);
 }
@@ -923,7 +916,7 @@ nav [navobj] {
 	background: var(--col-bg1);
 	backdrop-filter: blur(1.5rem);
 	color: var(--col-txt1);
-	padding: 2rem 1.5rem;
+	padding: 2rem 1.5em;
 	margin: auto;
 	border-radius: var(--siz-radius1);
 	z-index: 10;
@@ -977,7 +970,7 @@ nav [navobj] {
 	color: var(--col-txt1);
 	width: 100%;
 	height: 100%;
-	padding: 2rem 1.5rem;
+	padding: 2rem 1.5em;
 	margin: auto;
 	border-radius: var(--siz-radius1);
 	z-index: 5;
@@ -1020,7 +1013,7 @@ nav [navobj] {
 
 #loginmod small {
 	display: block;
-	margin-top: 2rem;
+	margin-top: 2em;
 	cursor: pointer;
 	opacity: 0.7;
 }
@@ -1029,7 +1022,7 @@ nav [navobj] {
 	position: fixed;
 	bottom: 10vh;
 	display: flex;
-	gap: 0.5rem;
+	gap: 0.5em;
 	flex-direction: row;
 }
 
@@ -1041,11 +1034,11 @@ nav [navobj] {
 #loginmod .backbtnuserspg {
 	display: flex;
 	align-items: center;
-	margin-top: 2rem;
+	margin-top: 2em;
 	background: #ffffff1a;
 	color: #ffffff;
-	border-radius: 2rem;
-	padding: 0.3rem 0.9rem;
+	border-radius: 2em;
+	padding: 0.3rem 0.9em;
 	padding-left: 5px;
 	border: 1px solid #414141;
 	animation: appshow 0.5s 1;
@@ -1062,7 +1055,7 @@ nav [navobj] {
 }
 
 .logincard button {
-	padding: 0.5rem;
+	padding: 0.5em;
 	border-radius: var(--siz-radius1);
 	border: none;
 	background: #dbdbdb;
@@ -1070,12 +1063,12 @@ nav [navobj] {
 	align-items: center;
 	cursor: pointer;
 	display: grid;
-	margin-left: 0.3rem;
+	margin-left: 0.3em;
 	color: #5988ab;
 }
 
 .logincard img {
-	width: 1.5rem;
+	width: 1.5em;
 	border-radius: var(--siz-radius1);
 	background: black;
 	border: 2px solid #748497;
@@ -1089,7 +1082,7 @@ nav [navobj] {
 	font-size: var(--font-size-subheading);
 	display: block;
 	text-align: center;
-	margin: 0.5rem;
+	margin: 0.5em;
 }
 
 .strtsearcont button span {
@@ -1108,7 +1101,7 @@ input#novamenusearchinp {
 }
 
 .novamenusearchinpbtn span {
-	font-size: 1rem;
+	font-size: 1em;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1120,7 +1113,7 @@ input#novamenusearchinp {
 	flex-direction: row;
 	background: var(--col-bg2);
 	border-radius: var(--siz-radius2);
-	gap: 0.3rem;
+	gap: 0.3em;
 	padding: 1px 5px;
 	border: var(--box-crisp);
 }
@@ -1172,7 +1165,7 @@ input#novamenusearchinp {
 	color: var(--col-txt1);
 	border: none;
 	padding: 6px 7px;
-	border-radius: .3rem;
+	border-radius: .3em;
 	cursor: pointer;
 	display: flex;
 	aspect-ratio: 1 / 1;
@@ -1214,7 +1207,7 @@ input#novamenusearchinp {
 }
 
 #sleepwindow h1 {
-	font-size: 5rem;
+	font-size: 5em;
 	background: linear-gradient(45deg, #ff5b5b, #ecff4e);
 	-webkit-background-clip: text;
 	background-clip: text;
@@ -1242,8 +1235,8 @@ input#novamenusearchinp {
 	color: var(--col-txt1);
 	opacity: 0.5;
 	position: absolute;
-	right: 2rem;
-	top: 2rem;
+	right: 2em;
+	top: 2em;
 	cursor: pointer;
 }
 
@@ -1333,12 +1326,12 @@ input#novamenusearchinp {
 }
 
 .windowheader svg {
-	width: 1rem;
+	width: 1em;
 	aspect-ratio: 1 / 1;
 	margin: 5px 2px;
 	display: flex;
 	height: auto;
-	margin-right: 0.3rem;
+	margin-right: 0.3em;
 }
 
 .windowheader .windowdataspan {
@@ -1399,8 +1392,8 @@ codeblock {
 	margin: 0;
 	display: flex;
 	justify-content: center;
-	height: 39px;
-	width: 39px;
+    height: 3em;
+    width: 3em;
 	aspect-ratio: 1 / 1;
 	overflow: visible;
 	border-radius: 6px;
@@ -1418,7 +1411,7 @@ dialog iframe {
 	font-family: inherit;
 	border-radius: var(--siz-radius1);
 	border: 1px solid grey;
-	margin-top: 0.5rem;
+	margin-top: 0.5em;
 }
 
 dialog#terminal {
@@ -1485,7 +1478,7 @@ dialog#terminal {
 
 .ibtnsside button {
 	flex: 1;
-	padding: 0 .8rem;
+	padding: 0 .8em;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1505,7 +1498,7 @@ dialog#terminal {
 }
 
 .ibtnsside button span {
-	font-size: 1rem;
+	font-size: 1em;
 }
 
 .searchbtnac {
@@ -1576,7 +1569,7 @@ dialog#terminal {
 	flex-wrap: nowrap;
 	width: 0;
 	transition: 0.3s;
-	gap: 0.5rem;
+	gap: 0.5em;
 	height: 40vh;
 }
 
@@ -1602,7 +1595,7 @@ dialog#terminal {
 	overflow: hidden;
 	overflow-y: auto;
 	width: 100%;
-	padding: 0.5rem;
+	padding: 0.5em;
 	padding-top: 0;
 	box-sizing: border-box;
 	scroll-snap-type: y mandatory;
@@ -1619,8 +1612,8 @@ dialog#terminal {
 	width: calc(100% - var(--sizing-normal));
 	font-size: var(--font-size-small);
 	color: lightgrey;
-	padding: 0 0.5rem;
-	padding-top: 0.3rem;
+	padding: 0 0.5em;
+	padding-top: 0.3em;
 }
 
 .notiflistnav span.material-symbols-rounded {
@@ -1642,7 +1635,7 @@ dialog#terminal {
 
 .searchside .notification {
 	background: var(--col-bg1)3b;
-	padding: 0.5rem;
+	padding: 0.5em;
 	border-radius: var(--siz-radius1);
 	color: var(--col-txt1);
 	display: flex;
@@ -1684,7 +1677,7 @@ dialog#terminal {
 .searchinputcont span {
 	width: fit-content;
 	font-size: var(--font-size-normal);
-	padding: 0.5rem;
+	padding: 0.5em;
 	opacity: 0.5;
 	display: grid;
 	justify-content: center;
@@ -1697,7 +1690,7 @@ dialog#terminal {
 	border: none;
 	border-radius: var(--siz-radius1);
 	color: inherit;
-	padding: 0.5rem 0rem;
+	padding: 0.5rem 0em;
 	display: block;
 	flex-grow: 1;
 }
@@ -1712,7 +1705,7 @@ dialog#terminal {
 	justify-content: flex-start;
 	transition: 0.3s;
 	border-radius: var(--siz-radius2);
-	margin-left: 0.7rem;
+	margin-left: 0.7em;
 	background: linear-gradient(90deg, #00000021 0%, transparent 30%);
 	height: 100%;
 }
@@ -1731,14 +1724,14 @@ dialog#terminal {
 #seprw-openb {
 	background-color: var(--col-bg3);
 	color: inherit;
-	padding: 0.3rem 0.7rem;
+	padding: 0.3rem 0.7em;
 	border: none;
 	box-shadow: 0 2px 0.3rem #02020242;
 	border-radius: var(--siz-radius2);
 	cursor: pointer;
 	display: block;
 	margin: auto;
-	margin-top: 0.5rem;
+	margin-top: 0.5em;
 	border: 1px solid #ffffff0c;
 
 	&:hover {
@@ -2226,7 +2219,7 @@ div#seapppreview {
 }
 
 .progress-bar {
-	height: 0.2rem;
+	height: 0.2em;
 	width: 0;
 	background-color: #76c7c0;
 	border-radius: 10px 0 0 10px;
@@ -2268,7 +2261,7 @@ noscript {
 	position: absolute;
 	top: 0;
 	right: 0;
-	padding: 2rem;
+	padding: 2em;
 	background: #2b2b2b;
 	color: white;
 	z-index: 100;
@@ -2288,7 +2281,7 @@ noscript {
 .userselect h1 {
 	font-size: 15vh;
 	opacity: 0.8;
-	margin-bottom: 1rem;
+	margin-bottom: 1em;
 }
 
 .userselect .divider {
@@ -2305,13 +2298,13 @@ noscript {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
-	gap: 0.3rem;
-	padding: 0.5rem;
+	gap: 0.3em;
+	padding: 0.5em;
 	align-items: center;
 	border-radius: var(--siz-radius1);
 	cursor: pointer;
 	border: 1px solid transparent;
-	padding-top: .7rem;
+	padding-top: .7em;
 
 	&>.name {
 		width: 100%;
@@ -2331,7 +2324,7 @@ noscript {
 		height: 2.5em;
 		object-fit: cover;
 		background: rgb(125 125 125 / 24%);
-		border-radius: 0.3rem;
+		border-radius: 0.3em;
 		aspect-ratio: 1 / 1;
 		width: auto;
 		display: flex;
@@ -2353,12 +2346,12 @@ noscript {
 	background: transparent;
 	color: var(--col-txt1);
 	border-radius: var(--siz-radius1);
-	padding: 0.3rem 0.6rem;
-	padding-right: 0.5rem;
+	padding: 0.3rem 0.6em;
+	padding-right: 0.5em;
 	display: flex;
 	width: fit-content;
 	flex-direction: column;
-	margin-left: 1rem;
+	margin-left: 1em;
 
 	&:focus {
 		outline: none;
@@ -2378,7 +2371,7 @@ noscript {
 	display: flex;
 	width: fit-content;
 	flex-direction: column;
-	margin-left: 1rem;
+	margin-left: 1em;
 }
 
 .userselect .newusbtn:hover .name {
@@ -2396,7 +2389,7 @@ noscript {
 #userschooser {
 	display: flex;
 	flex-direction: row;
-	gap: 0.5rem;
+	gap: 0.5em;
 	height: fit-content;
 	align-items: flex-start;
 	max-width: 80%;
@@ -2409,7 +2402,7 @@ noscript {
 	font-size: var(--font-size-small);
 	font-weight: normal;
 	margin: 0.3rem 0;
-	padding: 0.2rem;
+	padding: 0.2em;
 	display: block;
 	width: 100%;
 }
@@ -2437,7 +2430,7 @@ noscript {
 
 .erase-everything {
 	color: #ff4242;
-	bottom: 2rem;
+	bottom: 2em;
 	display: block;
 	opacity: 0.5;
 	position: absolute;
@@ -2453,10 +2446,10 @@ noscript {
 #versionswitcher {
 	display: block;
 	text-align: center;
-	padding: 4rem;
+	padding: 4em;
 	border: none;
-	font-size: 1.2rem;
-	border-radius: 2rem;
+	font-size: 1.2em;
+	border-radius: 2em;
 	background: linear-gradient(0deg, #0e0e0e, #18181885);
 	color: var(--col-txt1);
 	backdrop-filter: blur(2rem);
@@ -2469,7 +2462,7 @@ noscript {
 }
 
 #versionswitcher h1 {
-	font-size: 3rem;
+	font-size: 3em;
 	background: linear-gradient(45deg, #ff67d7, #4fbeff);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
@@ -2482,7 +2475,7 @@ noscript {
 .upgradeversionbtn {
 	border: none;
 	border-radius: var(--siz-radius1);
-	padding: 0.7rem 2rem;
+	padding: 0.7rem 2em;
 	display: block;
 	margin: 1rem auto;
 	background: #7d7aff;
@@ -2512,9 +2505,9 @@ div#toastdiv {
 	width: 100%;
 	height: 100%;
 	width: fit-content;
-	padding: 0.5rem 1rem;
+	padding: 0.5rem 1em;
 	background: var(--col-bg2);
-	border-radius: 1.5rem;
+	border-radius: 1.5em;
 	box-shadow: 0 8px 1rem #00000085;
 	margin: auto;
 	cursor: pointer;
@@ -2596,7 +2589,7 @@ div#toasticon {
 	width: 100%;
 	position: absolute;
 	height: calc(3% - .3rem);
-	top: -0.3rem;
+	top: -0.3em;
 	animation: .3s slideInTop;
 }
 
@@ -2604,7 +2597,7 @@ div#toasticon {
 	position: absolute;
 	height: calc(100% - 4rem);
 	width: calc(3% - .3rem);
-	right: -0.3rem;
+	right: -0.3em;
 	top: calc(3% - 0px);
 	animation: .3s slideInRight;
 }
@@ -2613,7 +2606,7 @@ div#toasticon {
 	position: absolute;
 	height: calc(100% - 4rem);
 	width: calc(3% - .3rem);
-	left: -0.3rem;
+	left: -0.3em;
 	top: calc(3% - 0px);
 	animation: .3s slideInLeft;
 }

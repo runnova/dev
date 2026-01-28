@@ -730,7 +730,6 @@ async function getFileNamesByFolder(folderPath) {
 }
 
 async function getAllItemsInFolder(folderPath) {
-    console.log(folderPath);
     folderPath = folderPath.endsWith('/') ? folderPath : folderPath + '/';
 
     try {

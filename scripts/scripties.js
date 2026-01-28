@@ -36,10 +36,10 @@ function cuteee() {
 	background:: #121212;
 	backdrop-filter: blur(5px) brightness(0.5);
 	position: absolute;
-	padding: 0.3rem 0.8rem;
+	padding: 0.3rem 0.8em;
 	border-radius: 0px 0 0 15px;
-	padding-bottom: 0.2rem;
-	padding-right: 0.3rem;
+	padding-bottom: 0.2em;
+	padding-right: 0.3em;
 	right: 0;
 	cursor: drag;
 	}
