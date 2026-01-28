@@ -463,6 +463,10 @@
             return devices.filter(device => device.kind === 'videoinput');
         }
 
+        function resetMirror() {
+    isMirrored = false;
+}
+
         async function startCamera() {
             const cameras = await getVideoSources();
             const cameraSelect = document.getElementById('camera-select');
@@ -529,7 +533,7 @@
                 video: { deviceId: deviceId },
                 audio: true
             });
-            video.srcObject = stream; 1
+            video.srcObject = stream;
             currentStream = stream;
 
             video.onloadedmetadata = () => {
@@ -665,73 +669,73 @@
             }
         }
         let recordingStartTime;
-let elapsedPausedTime = 0;
-let lastPauseTime;
+        let elapsedPausedTime = 0;
+        let lastPauseTime;
 
-async function actuallyStartRecording() {
-    recordedChunks = [];
+        async function actuallyStartRecording() {
+            recordedChunks = [];
 
-    const video = document.getElementById('video');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
 
-    function drawFrame() {
-        ctx.save();
-        if (isMirrored) {
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
+            function drawFrame() {
+                ctx.save();
+                if (isMirrored) {
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                }
+                if (filterFunctions[currentFilter]) {
+                    filterFunctions[currentFilter](ctx, canvas, video);
+                } else {
+                    filterFunctions.original(ctx, canvas, video);
+                }
+                ctx.restore();
+                requestAnimationFrame(drawFrame);
+            }
+            drawFrame();
+
+            const videoStream = canvas.captureStream(30);
+            const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const combinedStream = new MediaStream([
+                ...videoStream.getTracks(),
+                ...audioStream.getTracks()
+            ]);
+
+            mediaRecorder = new MediaRecorder(combinedStream, { mimeType: "video/webm; codecs=vp9" });
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = saveRecording;
+
+            mediaRecorder.start();
+            isRecording = true;
+            isPaused = false;
+            elapsedPausedTime = 0;
+
+            updateUI("recording");
+            document.getElementById("stopwatch-btn").style.display = "inline-flex";
+
+            recordingStartTime = Date.now();
+            updateStopwatch();
+            stopwatchInterval = setInterval(updateStopwatch, 1000);
+
+            document.getElementById("pause-btn").onclick = function () {
+                if (isPaused) {
+                    resumeRecording();
+                } else {
+                    pauseRecording();
+                }
+            };
+            document.getElementById("stop-btn").onclick = stopRecording;
         }
-        if (filterFunctions[currentFilter]) {
-            filterFunctions[currentFilter](ctx, canvas, video);
-        } else {
-            filterFunctions.original(ctx, canvas, video);
-        }
-        ctx.restore();
-        requestAnimationFrame(drawFrame);
-    }
-    drawFrame();
-
-    const videoStream = canvas.captureStream(30);
-    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const combinedStream = new MediaStream([
-        ...videoStream.getTracks(),
-        ...audioStream.getTracks()
-    ]);
-
-    mediaRecorder = new MediaRecorder(combinedStream, { mimeType: "video/webm; codecs=vp9" });
-
-    mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-            recordedChunks.push(event.data);
-        }
-    };
-
-    mediaRecorder.onstop = saveRecording;
-
-    mediaRecorder.start();
-    isRecording = true;
-    isPaused = false;
-    elapsedPausedTime = 0;
-
-    updateUI("recording");
-    document.getElementById("stopwatch-btn").style.display = "inline-flex";
-
-    recordingStartTime = Date.now();
-    updateStopwatch();
-    stopwatchInterval = setInterval(updateStopwatch, 1000);
-
-    document.getElementById("pause-btn").onclick = function () {
-        if (isPaused) {
-            resumeRecording();
-        } else {
-            pauseRecording();
-        }
-    };
-    document.getElementById("stop-btn").onclick = stopRecording;
-}
 
         function updateStopwatch() {
             if (!isRecording || isPaused) return; // Don't update if paused
@@ -1124,23 +1128,17 @@ async function actuallyStartRecording() {
             return await ntxSession.send("fileSet.createFile", path, filename, format, data);
 
         }
-
-
         function toggleMirror() {
-            const video = document.getElementById('videoCanvas');
             const mirrorBtn = document.getElementById('mirror-btn');
 
             isMirrored = !isMirrored;
-            video.style.transition = 'transform 0.5s ease-in-out';
-            video.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+
 
             mirrorBtn.classList.add('rotate-animation');
             setTimeout(() => {
                 mirrorBtn.classList.remove('rotate-animation');
             }, 500);
         }
-
-
         async function toggleFlashlight() {
             const flashlightBtn = document.getElementById('flashlight-btn');
 

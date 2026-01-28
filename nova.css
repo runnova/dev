@@ -15,9 +15,9 @@
 	--col-bad: #d44343;
 
 	/* sizing */
-	--sizing-normal: 1em;
-	--sizing-huge: 1.5em;
-	--sizing-nano: .5em;
+	--sizing-normal: .5em;
+	--sizing-huge: .3em;
+	--sizing-nano: .2em;
 
 	--siz-radius1: 0.5em;
 	--siz-radius2: 0.35em;
