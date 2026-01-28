@@ -16,7 +16,7 @@
 
 	/* sizing */
 	--sizing-normal: .5em;
-	--sizing-huge: .3em;
+	--sizing-huge: 1em;
 	--sizing-nano: .2em;
 
 	--siz-radius1: 0.5em;

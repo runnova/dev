@@ -259,7 +259,20 @@
 			border: var(--box-crisp);
 			display: block;
 			padding: var(--sizing-huge);
+			position: relative;
 			margin-bottom: 0.5em;
+			overflow: hidden;
+
+			&>img.goodOne {
+				position: absolute;
+				width: 30%;
+				height: 80%;
+				top: 10%;
+				right: 0;
+				object-fit: contain;
+				opacity: .3;
+				transform: rotate(-15deg) scale(1.5);
+			}
 		}
 
 		supportb b {
@@ -1468,7 +1481,7 @@
 
 		#appslist {
 			display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 			gap: .5em;
 		}
 
@@ -2787,7 +2800,7 @@
 				<div class="supportbtns">
 					<a id="membershipsbtn" onclick="window.open('https://github.com/runnova/NovaOS')">Star the repo</a>
 				</div>
-
+				<img src="https://runnova.github.io/NovaOS/n.png" class="goodOne">
 				<script>
 					function supportexpand() {
 						if (document.getElementById("membershipsbtn").style.display == "none") {
@@ -2925,7 +2938,7 @@
 					if (currentprov) {
 						document.getElementById("defappprovider").value = currentprov;
 					}
-					
+
 					let registry = await window.parent.getSetting('full', "AppRegistry.json");
 
 					let appslist = document.getElementById("appslist");

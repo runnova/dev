@@ -155,11 +155,24 @@ nav [navobj] {
 	display: block;
 }
 
-[navobj] [app-shortcut] {
+[navobj] .app-shortcut {
 	background-color: transparent;
 	cursor: pointer;
 	animation: appop 0.3s var(--time2);
 	transition: var(--time1);
+	border-radius: 0;
+
+	&:first-child {
+		border-radius: var(--siz-radius1) 0 0 var(--siz-radius1);
+	}
+
+	&:last-child {
+		border-radius: 0 var(--siz-radius1) var(--siz-radius1) 0;
+	}
+
+	&:only-child {
+		border-radius: var(--siz-radius1);
+	}
 }
 
 #novaic {
@@ -267,23 +280,13 @@ nav [navobj] {
 	background-color: transparent;
 	padding: 10px;
 	cursor: pointer;
+	border-radius: var(--siz-radius1);
 	width: 90px;
 	animation: pop var(--time1);
 	display: inline-block;
 	border: 1px solid transparent;
 	text-align: center;
 	align-self: flex-start;
-
-	&:first-child {
-		border-radius: var(--siz-radius1) 0 0  var(--siz-radius1);
-	}
-
-	&:last-child {
-		border-radius: 0 var(--siz-radius1) var(--siz-radius1) 0;
-	}
-	&:only-child {
-		border-radius: var(--siz-radius1);
-	}
 }
 
 .app-shortcut.tooltip .tooltiptext {
@@ -381,18 +384,16 @@ nav [navobj] {
 	box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
 	outline: none;
 	animation: dmodthingy .3s cubic-bezier(0.36, 0.38, 0, 0.94);
+		margin-bottom: 3.8em;
 }
 
 #appdmod {
-	margin-bottom: 3.8em;
 	background-color: var(--col-bg1);
 	border: 1px solid #ffffff0c;
-	padding: 1em .3em;
 }
 
 #searchwindow {
-	padding: 0.7em;
-	margin-bottom: 60px;
+	padding: .3em;
 	background-color: var(--col-bg1);
 	border: 1px solid #ffffff0c;
 	padding-bottom: 9px;
@@ -406,12 +407,12 @@ nav [navobj] {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	padding: .5em;
 	justify-content: space-between;
 }
 
 .strtsearcont {
 	display: flex;
-	margin: 0 10px;
 	margin-top: 10px;
 	flex-wrap: nowrap;
 	flex-direction: row;
@@ -659,8 +660,8 @@ nav [navobj] {
 	height: auto;
 
 	& svg {
-		width: 2.2em;
-		height: 2.2em;
+        width: 1.5em;
+        height: 1.5em;
 		margin-right: 0.3em;
 	}
 
@@ -723,7 +724,6 @@ nav [navobj] {
 	justify-items: center;
 	justify-content: space-around;
 	align-items: start;
-	padding: 0 0.5em;
 }
 
 .notifbtn {
@@ -1568,6 +1568,7 @@ dialog#terminal {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	width: 100%;
+    align-items: stretch;
 }
 
 .searchside {
@@ -1716,7 +1717,6 @@ dialog#terminal {
 	border-radius: var(--siz-radius2);
 	margin-left: 0.7em;
 	background: linear-gradient(90deg, #00000021 0%, transparent 30%);
-	height: 100%;
 }
 
 #seprw-icon {
