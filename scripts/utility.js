@@ -187,8 +187,16 @@ function stringToDarkPastelColor(str) {
 	return `rgb(${darkPastelR}, ${darkPastelG}, ${darkPastelB})`;
 }
 
-function ptypext(str) {
-	return mtpetxt(str);
+function mtpetxt(str) {
+	if (!str) {
+		return;
+	}
+	try {
+		const parts = str.split('.');
+		return parts.length > 1 ? parts.pop() : '';
+	} catch (err) {
+		console.error(err)
+	}
 }
 
 function toTitleCase(str) {
@@ -312,4 +320,78 @@ async function navGetBattery() {
 
 function getapnme(x) {
 	return x.split(".")[0];
+}
+
+const jsonToDataURI = json => `data:application/json,${encodeURIComponent(JSON.stringify(json))}`;
+
+function isBase64(str) {
+	try {
+		function validateBase64(data) {
+			const base64Pattern = /^[A-Za-z0-9+/=]+$/;
+			if (!base64Pattern.test(data)) {
+				return false;
+			}
+			const padding = data.length % 4;
+			if (padding > 0) {
+				data += '='.repeat(4 - padding);
+			}
+			atob(data);
+			return true;
+		}
+		if (validateBase64(str)) {
+			return true;
+		}
+		const base64Prefix = 'data:';
+		const base64Delimiter = ';base64,';
+		if (str.startsWith(base64Prefix)) {
+			const delimiterIndex = str.indexOf(base64Delimiter);
+			if (delimiterIndex !== -1) {
+				const base64Data = str.substring(delimiterIndex + base64Delimiter.length);
+				return validateBase64(base64Data);
+			}
+		}
+		return false;
+	} catch (err) {
+		return false;
+	}
+}
+
+function calculateSimilarity(string1, string2) {
+	const m = string1.length;
+	const n = string2.length;
+	const dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
+	for (let i = 0; i <= m; i++) {
+		for (let j = 0; j <= n; j++) {
+			if (i === 0) dp[i][j] = j;
+			else if (j === 0) dp[i][j] = i;
+			else if (string1[i - 1] === string2[j - 1]) dp[i][j] = dp[i - 1][j - 1];
+			else {
+				const penalty = (i + j) / (m + n);
+				dp[i][j] = 1 + Math.min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1] + penalty);
+			}
+		}
+	}
+	return 1 - dp[m][n] / Math.max(m, n);
+}
+
+function containsSmallSVGElement(str) {
+	var svgRegex = /^<svg\s*[^>]*>[\s\S]*<\/svg>$/i;
+	if (!svgRegex.test(str) || str.length > 10000) return false;
+
+	var idMap = {};
+	var idRegex = /\bid="([^"]+)"/g;
+	var urlRefRegex = /url\(#([^")]+)\)/g;
+
+	str = str.replace(idRegex, function (match, id) {
+		if (!idMap[id]) {
+			idMap[id] = 'svguid_' + Math.random().toString(36).substr(2, 8);
+		}
+		return `id="${idMap[id]}"`;
+	});
+
+	str = str.replace(urlRefRegex, function (match, id) {
+		return idMap[id] ? `url(#${idMap[id]})` : match;
+	});
+
+	return str;
 }

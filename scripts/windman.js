@@ -545,3 +545,150 @@ function dragElement(elmnt) {
         return false;
     }
 }
+
+
+
+function minim(winuid) {
+    const x = gid('window' + winuid);
+
+    if (winds[winuid]["visualState"] === "minimized") {
+        x.style.display = "flex";
+        winds[winuid]["visualState"] = "free";
+    } else {
+        if (isWinOnTop('window' + winuid)) {
+            x.classList.add("transp4");
+            winds[winuid]["visualState"] = "minimized";
+
+            setTimeout(() => {
+                x.classList.remove("transp4");
+                x.style.display = "none";
+                nowapp = '';
+            }, 100);
+        } else {
+            putwinontop('window' + winuid);
+        }
+    }
+}
+
+function flwin(winElement) {
+    winElement.classList.add("transp2");
+    const winuid = winElement.getAttribute("data-winuid");
+    const flbtn = winElement.getElementsByClassName("flbtn")[0];
+
+    const isFree = winds[winuid]["visualState"] != "fullscreen";
+
+    if (isFree) {
+        maximizeWindow(winuid);
+        flbtn.innerHTML = "close_fullscreen";
+    } else {
+        resetWindow(winuid);
+        flbtn.innerHTML = "open_in_full";
+    }
+
+    setTimeout(() => {
+        winElement.classList.remove("transp2");
+    }, 1000);
+}
+
+
+
+function updateFocusedWindowBorder() {
+    if (!sessionSettings.windowoutline) return;
+    Object.keys(winds).forEach(winuid => {
+        const winEl = document.getElementById("window" + winuid);
+        if (winEl) winEl.style.boxShadow = "";
+    });
+    const focusedWinuid = Object.keys(winds).find(winuid => winuid === nowapp);
+    if (focusedWinuid) {
+        const winEl = document.getElementById("window" + focusedWinuid);
+        if (winEl) winEl.style.boxShadow = "0 0 0 2px var(--col-bgh)";
+    }
+}
+
+function clwin(x) {
+	snappingconthide();
+	const el = isElement(x) ? x : document.getElementById(x.startsWith("window") ? x : "window" + x);
+	const windKey = isElement(x) ? el.getAttribute("data-winuid") : x;
+	if (windKey) {
+		console.log(windKey)
+		URL.revokeObjectURL(winds[windKey].src)
+		delete winds[windKey];
+	}
+	loadtaskspanel()
+	if (!el) return;
+
+	el.classList.add("transp3");
+	setTimeout(() => {
+		el.classList.remove("transp3");
+		el.remove();
+	}, 700);
+}
+function putwinontop(x) {
+	Object.keys(winds).forEach(wid => {
+		if (gid(`window${wid}`).style.zIndex)
+			winds[wid].zIndex = Number(gid(`window${wid}`).style.zIndex || 0);
+		else
+			return;
+	});
+
+	if (Object.keys(winds).length > 1) {
+		const windValues = Object.values(winds).map(wind => Number(wind.zIndex) || 0);
+		const maxWindValue = Math.max(...windValues);
+		document.getElementById(x).style.zIndex = maxWindValue + 1;
+		normalizeZIndexes(x);
+	} else {
+		document.getElementById(x).style.zIndex = 0;
+	}
+	if (typeof updateFocusedWindowBorder === "function") updateFocusedWindowBorder();
+}
+function isWinOnTop(x) {
+	const ourKey = x.replace(/^window/, '');
+	const maxKey = Object.keys(winds).reduce((a, b) => (Number(winds[a].zIndex) > Number(winds[b].zIndex) ? a : b));
+
+	return ourKey === maxKey;
+}
+
+function normalizeZIndexes(excludeWindowId = null) {
+	const windValues = Object.entries(winds)
+		.filter(([key]) => key !== excludeWindowId)
+		.map(([_, wind]) => Number(wind.zIndex) || 0);
+
+	const uniqueSorted = [...new Set(windValues)].sort((a, b) => a - b);
+	if (uniqueSorted.length === uniqueSorted[uniqueSorted.length - 1]) return;
+
+	const zIndexMap = uniqueSorted.reduce((map, value, index) => {
+		map[value] = index;
+		return map;
+	}, {});
+
+	winds = Object.keys(winds).reduce((normalizedWinds, key) => {
+		normalizedWinds[key] = {
+			...winds[key],
+			zIndex: key === excludeWindowId
+				? winds[key].zIndex
+				: zIndexMap[Number(winds[key].zIndex) || 0],
+		};
+		return normalizedWinds;
+	}, {});
+}
+
+function closeallwindows() {
+	Object.keys(winds).forEach(key => {
+		const taskId = key.slice(-12);
+		clwin(taskId);
+	});
+	gid("closeallwinsbtn").checked = true;
+}
+
+function setTitle(windowID, title) {
+	if (typeof title !== "string") {
+		console.error("Title must be a string.");
+		return;
+	}
+	const element = document.getElementById("window" + windowID + "titlespan");
+	if (element) {
+		element.innerText = title;
+	} else {
+		console.warn("Title element not found in the DOM.");
+	}
+}

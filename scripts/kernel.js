@@ -64,7 +64,7 @@ async function openfile(x, stufftodo) {
             return;
         }
         // extract type from file extension
-        mm.type = ptypext(mm.fileName);
+        mm.type = mtpetxt(mm.fileName);
 
         if (mm.type == "app") {
             // run the app if it is one
@@ -416,71 +416,4 @@ async function openapp(appTitle, external, customtodo, headless = false) {
     };
 
     fetchDataAndSave(appTitle);
-}
-
-function minim(winuid) {
-    const x = gid('window' + winuid);
-
-    if (winds[winuid]["visualState"] === "minimized") {
-        x.style.display = "flex";
-        winds[winuid]["visualState"] = "free";
-    } else {
-        if (isWinOnTop('window' + winuid)) {
-            x.classList.add("transp4");
-            winds[winuid]["visualState"] = "minimized";
-
-            setTimeout(() => {
-                x.classList.remove("transp4");
-                x.style.display = "none";
-                nowapp = '';
-            }, 100);
-        } else {
-            putwinontop('window' + winuid);
-        }
-    }
-}
-
-function flwin(winElement) {
-    winElement.classList.add("transp2");
-    const winuid = winElement.getAttribute("data-winuid");
-    const flbtn = winElement.getElementsByClassName("flbtn")[0];
-
-    const isFree = winds[winuid]["visualState"] != "fullscreen";
-
-    if (isFree) {
-        maximizeWindow(winuid);
-        flbtn.innerHTML = "close_fullscreen";
-    } else {
-        resetWindow(winuid);
-        flbtn.innerHTML = "open_in_full";
-    }
-
-    setTimeout(() => {
-        winElement.classList.remove("transp2");
-    }, 1000);
-}
-
-async function safeRemoveApp(id) {
-    try {
-        await remSettingKey(id, "AppRegistry.json");
-        let settingid = handlers["Store@runnova"];
-        await remSettingKey(id, settingid + ".json");
-        return true;
-    } catch (error) {
-        console.error("Error removing app:", error);
-        return false;
-    }
-}
-
-function updateFocusedWindowBorder() {
-    if (!sessionSettings.windowoutline) return;
-    Object.keys(winds).forEach(winuid => {
-        const winEl = document.getElementById("window" + winuid);
-        if (winEl) winEl.style.boxShadow = "";
-    });
-    const focusedWinuid = Object.keys(winds).find(winuid => winuid === nowapp);
-    if (focusedWinuid) {
-        const winEl = document.getElementById("window" + focusedWinuid);
-        if (winEl) winEl.style.boxShadow = "0 0 0 2px var(--col-bgh)";
-    }
 }

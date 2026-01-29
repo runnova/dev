@@ -373,7 +373,7 @@
 				makeMenu(Object.values(window.parent.fileActions));
 				let x = await window.parent.getFileById(item.id);
 				let y = await window.parent.unshrinkbsf(x.content);
-				let t = window.parent.getbaseflty(window.parent.ptypext(item.name));
+				let t = window.parent.getbaseflty(window.parent.mtpetxt(item.name));
 
 				if (x.metadata) {
 					document.getElementById("flint").innerHTML = window.parent.timeAgo(x.metadata.datetime);
@@ -447,7 +447,7 @@
 					for (const item of lcldata) {
 						try {
 							let x = await window.parent.getFileById(item.id);
-							let t = window.parent.getbaseflty(window.parent.ptypext(item.name));
+							let t = window.parent.getbaseflty(window.parent.mtpetxt(item.name));
 							if (t === "image" || t === "video") {
 								let md = x.metadata || {};
 								if (md.datetime) {

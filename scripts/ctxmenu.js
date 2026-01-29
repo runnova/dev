@@ -47,7 +47,7 @@ window.fileActions = {
 		icon: 'wallpaper',
 		label: 'Set As Wallpaper',
 		action: (itemuid) => makewall(itemuid),
-		condition: (file) => getbaseflty(ptypext(file.fileName)) === 'image',
+		condition: (file) => getbaseflty(mtpetxt(file.fileName)) === 'image',
 	},
 	move: {
 		icon: 'drive_file_move',

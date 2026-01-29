@@ -10,60 +10,7 @@ var batteryLevel, winds = {}, memory = {}, _nowapp, fulsapp = false, appsHistory
 	"gallery",
 	"browser",
 	"studio"
-], timeFormat, timetypecondition = true, genTaskBar, genDesktop, nonotif;
-
-let currentImage = 1;
-function setbgimagetourl(x) {
-	const img1 = document.getElementById('bgimage1');
-	const img2 = document.getElementById('bgimage2');
-	if (!img1 || !img2) return;
-
-	const activeImg = currentImage === 1 ? img1 : img2;
-	const nextImg = currentImage === 1 ? img2 : img1;
-
-	nextImg.style.opacity = 0;
-
-	const setImageSrc = (url) => {
-		nextImg.src = url;
-		nextImg.onload = async () => {
-			nextImg.style.opacity = 1;
-			activeImg.style.opacity = 0;
-			activeImg.classList.remove('current-bg');
-			nextImg.classList.add('current-bg');
-			currentImage = currentImage === 1 ? 2 : 1;
-
-			const wallpos = await getSetting("wallpaperPos") || "center";
-			document.getElementsByClassName("current-bg")[0].style.objectPosition = wallpos;
-			const wallsiz = await getSetting("wallpaperSiz") || "cover";
-			document.getElementsByClassName("current-bg")[0].style.objectFit = wallsiz;
-		};
-	};
-
-	if (x.startsWith('data:')) {
-		try {
-			const byteString = atob(x.split(',')[1]);
-			const mimeString = x.split(',')[0].split(':')[1].split(';')[0];
-			const arrayBuffer = new Uint8Array(byteString.length);
-
-			for (let i = 0; i < byteString.length; i++) {
-				arrayBuffer[i] = byteString.charCodeAt(i);
-			}
-
-			const blob = new Blob([arrayBuffer], { type: mimeString });
-			const blobUrl = URL.createObjectURL(blob);
-
-			setImageSrc(blobUrl);
-			setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-		} catch (e) {
-			console.error("Failed to decode base64 string:", e);
-		}
-	} else {
-		setImageSrc(x);
-	}
-
-	(async () => {
-	})();
-}
+], timeFormat, timetypecondition = true, genTaskBar, genDesktop, nonotif, currentImage = 1;
 
 Object.defineProperty(window, 'nowapp', {
 	get() {
@@ -312,7 +259,6 @@ function updateTime() {
 	gid('time-display').innerText = timeFormat;
 	gid('date-display').innerText = date;
 }
-const jsonToDataURI = json => `data:application/json,${encodeURIComponent(JSON.stringify(json))}`;
 async function openn() {
 	gid("strtsear").value = "";
 	gid("strtappsugs").style.display = "none";
@@ -446,7 +392,6 @@ async function loadrecentapps() {
 	});
 
 }
-
 function makedefic(str) {
 	if (!str) {
 		return 'app';
@@ -467,7 +412,9 @@ function makedefic(str) {
 		}
 	});
 	return result.join('').slice(0, 3);
-} function updateBattery() {
+} 
+
+function updateBattery() {
 	var batteryPromise;
 	if ('getBattery' in navigator) {
 		batteryPromise = navigator.getBattery();
@@ -510,25 +457,6 @@ function makedefic(str) {
 	}).catch(function () {
 		document.getElementById("batterydisdiv").style.display = "none";
 	});
-}
-
-function clwin(x) {
-	snappingconthide();
-	const el = isElement(x) ? x : document.getElementById(x.startsWith("window") ? x : "window" + x);
-	const windKey = isElement(x) ? el.getAttribute("data-winuid") : x;
-	if (windKey) {
-		console.log(windKey)
-		URL.revokeObjectURL(winds[windKey].src)
-		delete winds[windKey];
-	}
-	loadtaskspanel()
-	if (!el) return;
-
-	el.classList.add("transp3");
-	setTimeout(() => {
-		el.classList.remove("transp3");
-		el.remove();
-	}, 700);
 }
 
 function getMetaTagContent(unshrunkContent, metaName, decode = false) {
@@ -659,65 +587,6 @@ async function fetchData(url) {
 	}
 }
 var content;
-function putwinontop(x) {
-	Object.keys(winds).forEach(wid => {
-		if (gid(`window${wid}`).style.zIndex)
-			winds[wid].zIndex = Number(gid(`window${wid}`).style.zIndex || 0);
-		else
-			return;
-	});
-
-	if (Object.keys(winds).length > 1) {
-		const windValues = Object.values(winds).map(wind => Number(wind.zIndex) || 0);
-		const maxWindValue = Math.max(...windValues);
-		document.getElementById(x).style.zIndex = maxWindValue + 1;
-		normalizeZIndexes(x);
-	} else {
-		document.getElementById(x).style.zIndex = 0;
-	}
-	if (typeof updateFocusedWindowBorder === "function") updateFocusedWindowBorder();
-}
-function isWinOnTop(x) {
-	const ourKey = x.replace(/^window/, '');
-	const maxKey = Object.keys(winds).reduce((a, b) => (Number(winds[a].zIndex) > Number(winds[b].zIndex) ? a : b));
-
-	return ourKey === maxKey;
-}
-
-function normalizeZIndexes(excludeWindowId = null) {
-	const windValues = Object.entries(winds)
-		.filter(([key]) => key !== excludeWindowId)
-		.map(([_, wind]) => Number(wind.zIndex) || 0);
-
-	const uniqueSorted = [...new Set(windValues)].sort((a, b) => a - b);
-	if (uniqueSorted.length === uniqueSorted[uniqueSorted.length - 1]) return;
-
-	const zIndexMap = uniqueSorted.reduce((map, value, index) => {
-		map[value] = index;
-		return map;
-	}, {});
-
-	winds = Object.keys(winds).reduce((normalizedWinds, key) => {
-		normalizedWinds[key] = {
-			...winds[key],
-			zIndex: key === excludeWindowId
-				? winds[key].zIndex
-				: zIndexMap[Number(winds[key].zIndex) || 0],
-		};
-		return normalizedWinds;
-	}, {});
-}
-
-function requestLocalFile() {
-	var requestID = genUID()
-	x = {
-		"appname": "files",
-		"type": "open",
-		"identifier": requestID
-	}
-	localStorage.setItem("todo", JSON.stringify(x))
-	openapp("files", 1)
-}
 function getMaxZIndex() {
 	const elements = document.querySelectorAll('.window');
 	let maxZIndex = 0;
@@ -740,37 +609,7 @@ function folderExists(folderName) {
 	}
 	return true;
 }
-function isBase64(str) {
-	try {
-		function validateBase64(data) {
-			const base64Pattern = /^[A-Za-z0-9+/=]+$/;
-			if (!base64Pattern.test(data)) {
-				return false;
-			}
-			const padding = data.length % 4;
-			if (padding > 0) {
-				data += '='.repeat(4 - padding);
-			}
-			atob(data);
-			return true;
-		}
-		if (validateBase64(str)) {
-			return true;
-		}
-		const base64Prefix = 'data:';
-		const base64Delimiter = ';base64,';
-		if (str.startsWith(base64Prefix)) {
-			const delimiterIndex = str.indexOf(base64Delimiter);
-			if (delimiterIndex !== -1) {
-				const base64Data = str.substring(delimiterIndex + base64Delimiter.length);
-				return validateBase64(base64Data);
-			}
-		}
-		return false;
-	} catch (err) {
-		return false;
-	}
-}
+
 async function extractAndRegisterCapabilities(appId, content) {
 	try {
 		if (!content) {
@@ -953,145 +792,11 @@ async function cleanupInvalidAssociations() {
 		}
 	}
 }
-
 async function getAllValidAppIds() {
 	const appsFolder = await getFileNamesByFolder('Apps/');
 	return Object.keys(appsFolder || {}).map(appFileName => appsFolder[appFileName].id);
 }
-function makedialogclosable(ok) {
-	const myDialog = gid(ok);
 
-	if (!myDialog.__originalClose) {
-		myDialog.__originalClose = myDialog.close;
-		myDialog.close = function () {
-			console.log(342, ok)
-			this.classList.add("closeEffect");
-
-			function handler() {
-				myDialog.__originalClose();
-				myDialog.classList.remove("closeEffect");
-			};
-			setTimeout(handler, 200);
-		};
-	}
-
-	document.addEventListener('click', (event) => {
-		if (event.target === myDialog) {
-			myDialog.close();
-		}
-	});
-}
-function openModal(type, { title = '', message, options = null, status = null, preset = '' } = {}, registerRef = false) {
-	if (badlaunch) { return }
-	return new Promise((resolve) => {
-		const modal = document.createElement('dialog');
-		modal.classList.add('modal');
-
-		const modalItemsCont = document.createElement('div');
-		modalItemsCont.classList.add('modal-items');
-
-		if (status) {
-			const icon = document.createElement('span');
-			icon.classList.add('material-symbols-rounded');
-			let ic = "warning";
-			if (status === "success") ic = "check_circle";
-			else if (status === "failed") ic = "dangerous";
-			icon.textContent = ic;
-			icon.classList.add('modal-icon');
-			modalItemsCont.appendChild(icon);
-
-		}
-		if (title && title.length > 0) {
-
-			const h1 = document.createElement('h1');
-			h1.textContent = title;
-			modalItemsCont.appendChild(h1);
-		}
-
-		const p = document.createElement('p');
-		if (type === 'say' || type === 'confirm') {
-			p.innerHTML = `${message}`;
-		} else {
-			p.textContent = message;
-		}
-		modalItemsCont.appendChild(p);
-
-		let dropdown = null;
-		if (type === 'dropdown') {
-			dropdown = document.createElement('select');
-			let items = Array.isArray(options) ? options : Object.values(options);
-			for (const option of items) {
-				const opt = document.createElement('option');
-				opt.value = option;
-				opt.textContent = option;
-				dropdown.appendChild(opt);
-			}
-			modalItemsCont.appendChild(dropdown);
-		}
-
-		let inputField = null;
-		if (type === 'ask') {
-			inputField = document.createElement('input');
-			inputField.type = 'text';
-			inputField.value = preset;
-			modalItemsCont.appendChild(inputField);
-		}
-
-		const btnContainer = document.createElement('div');
-		btnContainer.classList.add('button-container');
-		modalItemsCont.appendChild(btnContainer);
-
-		const yesButton = document.createElement('button');
-		yesButton.textContent = type === 'confirm' ? 'Yes' : 'OK';
-		btnContainer.appendChild(yesButton);
-
-		if (type === 'confirm' || type === 'dropdown') {
-			const noButton = document.createElement('button');
-			noButton.textContent = type === 'confirm' ? 'No' : 'Cancel';
-			btnContainer.appendChild(noButton);
-			noButton.onclick = () => {
-				modal.close();
-				modal.remove();
-				resolve(false);
-			};
-		}
-
-		yesButton.onclick = () => {
-			modal.close();
-			modal.remove();
-			if (type === 'dropdown') {
-				resolve(dropdown.value);
-			} else if (type === 'ask') {
-				resolve(inputField.value);
-			} else {
-				resolve(true);
-			}
-		};
-
-		if (registerRef) {
-			document.getElementById("window" + notificationContext[registerRef]?.windowID).querySelectorAll(".windowcontent")[0].appendChild(modal);
-			modal.show();
-			modal.appendChild(modalItemsCont);
-		} else {
-			document.body.appendChild(modal);
-			modal.appendChild(modalItemsCont);
-			modal.showModal();
-		}
-	});
-}
-
-function justConfirm(title, message, registerRef = false) {
-	return openModal('confirm', { title, message }, registerRef);
-}
-function showDropdownModal(title, message, options, registerRef = false) {
-	return openModal('dropdown', { title, message, options }, registerRef);
-}
-function say(message, status = null, registerRef = false) {
-	return openModal('say', { message, status }, registerRef);
-}
-function ask(question, preset = '', registerRef = false) {
-	return openModal('ask', { message: question, preset }, registerRef);
-}
 const removalQueue = new Map();
 
 async function loadtaskspanel() {
@@ -1202,175 +907,13 @@ function tryRemoveElement(element, key) {
 }
 
 var dev;
-function shrinkbsf(str) {
-	return str;
+function shrinkbsf(s) {
+	return s;
 }
-function unshrinkbsf(compressedStr) {
-	return compressedStr;
+function unshrinkbsf(s) {
+	return s;
 }
-async function makewall(deid) {
-	let x = deid;
-	if (x != undefined) {
-		let unshrinkbsfX;
-		if (x.startsWith("http")) {
-			unshrinkbsfX = x;
-		} else {
-			unshrinkbsfX = await getFileById(x);
-			unshrinkbsfX = unshrinkbsfX.content;
-		}
-		setbgimagetourl(unshrinkbsfX);
-	}
-	await setSetting("wall", deid);
-}
-eventBusWorker.listen({
-	type: "settings",
-	event: "set",
-	key: "wall",
-	callback: () => {
-		console.log(342423424)
-		setTimeout(() => { loadSessionSettings(); renderWall() }, 1500)
-	}
-});
-async function initializeOS() {
-	if (badlaunch) { return }
-	dbCache = null;
-	cryptoKeyCache = null;
-	await say(`
-		<h2 style="margin: 0">This is an open source system</h2>
-		<p style="">NovaOS uses several browser APIs to store, manage and display data.
-		</p>
-		<div style="background:: #001b00; color: lightgreen; padding: 0.8em; border: 1px solid #254625;font-size:inherit; border-radius: .5em; margin: 0rem 0; display: flex;flex-direction:row; align-items: center; justify-content: flex-start;gap:0.5em;">
-			<span class="material-symbols-rounded">check</span>
-			<div>We do not store or share your personal information.</div>
-		</div>
-	`, "success");
-	console.log("Setting Up NovaOS\n\nUsername: " + CurrentUsername + "\nWith: Sample preset\nUsing host: " + location.href)
-	initialization = true
-	memory = {
-		"root": {
-			"Downloads/": {
-			},
-			"Apps/": {},
-			"Desktop/": {},
-			"Dock/": {},
-			"Media/": {}
-		}
-	};
 
-	setdb().then(async function () {
-		await saveMagicStringInLocalStorage(password);
-		await ensureAllSettingsFilesExist()
-			.then(async () => await installdefaultapps())
-			.then(async () => getFileNamesByFolder("Apps"))
-			.catch(error => {
-				console.error("Error during initialization:", error);
-			})
-			.then(async () => {
-				sharedStore.set(CurrentUsername, "icon", "data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%3Csvg%20fill%3D%22%23ffffff%22%20width%3D%22800px%22%20height%3D%22800px%22%20viewBox%3D%220%200%20256%20256%22%20id%3D%22Flat%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M228%2C128A100%2C100%2C0%2C1%2C0%2C60.71%2C201.90967a3.97048%2C3.97048%2C0%2C0%2C0%2C.842.751%2C99.79378%2C99.79378%2C0%2C0%2C0%2C132.8982-.00195%2C3.96558%2C3.96558%2C0%2C0%2C0%2C.83813-.74756A99.76267%2C99.76267%2C0%2C0%2C0%2C228%2C128ZM36%2C128a92%2C92%2C0%2C1%2C1%2C157.17139%2C64.87207%2C75.616%2C75.616%2C0%2C0%2C0-44.50782-34.04053%2C44%2C44%2C0%2C1%2C0-41.32714%2C0%2C75.61784%2C75.61784%2C0%2C0%2C0-44.50782%2C34.04A91.70755%2C91.70755%2C0%2C0%2C1%2C36%2C128Zm92%2C28a36%2C36%2C0%2C1%2C1%2C36-36A36.04061%2C36.04061%2C0%2C0%2C1%2C128%2C156ZM68.86475%2C198.417a68.01092%2C68.01092%2C0%2C0%2C1%2C118.27.00049%2C91.80393%2C91.80393%2C0%2C0%2C1-118.27-.00049Z%22%2F%3E%3C%2Fsvg%3E")
-				nonotif = false;
-				setSetting("narrowMode", matchMedia('(max-width: 500px)').matches);
-				await startup();
-				let textcontentwelcome = await fetch("appdata/welcome.html");
-				textcontentwelcome = await textcontentwelcome.text();
-				await createFile('Downloads/', 'Welcome.html', 'html', textcontentwelcome)
-				notify("Welcome to NovaOS, " + CurrentUsername + "!", "I really think you'd enjoy it!", "NovaOS");
-				initialization = false;
-			})
-	})
-} async function updateApp(appName, attempt = 1) {
-	try {
-		const filePath = "appdata/" + appName + ".html";
-		const response = await fetch(filePath);
-		if (!response.ok) {
-			throw new Error("Failed to fetch file for " + appName);
-		}
-		const fileContent = await response.text();
-
-		return await createFile("Apps/", toTitleCase(appName), "app", fileContent);
-	} catch (error) {
-		console.error("Error updating " + appName + ":", error.message);
-		if (attempt < maxRetries) {
-			return await updateApp(appName, attempt + 1);
-		} else {
-			console.error("Max retries reached for " + appName + ". Skipping update.");
-			failedApps.push(appName);
-			return false;
-		}
-	}
-}
-async function installdefaultapps() {
-	nonotif = true;
-	gid("edison").showModal();
-	gid("lazarus").showModal()
-	if (gid('startupterms')) {
-		gid('startupterms').innerText = "Just a moment...";
-	}
-	gid("appdmod").close();
-	setTimeout(() => gid("lazarus").classList.add("closeEffect"), 2700);
-	setTimeout(() => gid("lazarus").close(), 3000);
-
-	const failedApps = [];
-	async function waitForNonNull() {
-		let result = null;
-		while (result === null) {
-			result = await updateMemoryData();
-			if (result === null) {
-				gid('startupterms').innerText = "Waiting for DB to open...";
-				await new Promise(resolve => setTimeout(resolve, 1000));
-			}
-		}
-		return result;
-	}
-
-	await waitForNonNull().then(async () => {
-		const hangMessages = ["Hang in tight...", "Almost there...", "Just a moment more...", "Patience, young grasshopper...", "await fellow padawan...", "Let's see if the stars are with us today...", "what's the meaning of it all...", "just a sec, let me get ready...", "So, what have you been doing lately?", "What are you doing after this?", "Some apps aren't installing, i'm trying again...", "Let's take it slow and precise right?"];
-
-		const interval = setInterval(() => {
-			const randomIndex = Math.floor(Math.random() * hangMessages.length);
-			gid('startupterms').innerText = hangMessages[randomIndex];
-		}, 2500);
-
-
-		let lclver = await getSetting("versions", "defaultApps.json") || {};
-
-		for (let i = 0; i < defAppsList.length; i++) {
-			await new Promise(res => setTimeout(res, 300));
-			const appName = defAppsList[i];
-			const updated = await Promise.race([updateApp(appName), new Promise(res => setTimeout(res, 3000))]);
-			if (updated && updated.id) {
-				lclver[appName] = { version: fetchupdatedataver[appName] || 0, appid: updated.id };
-			}
-			setsrtpprgbr(Math.round((i + 1) / defAppsList.length * 100));
-		}
-		await setSetting("versions", lclver, "defaultApps.json");
-
-		clearInterval(interval);
-
-		if (failedApps.length > 0) {
-			const response = await say(failedApps.length + " apps failed to download. This might be an internet issue, retry?");
-			if (response === "yes" || response === true) {
-				const stillFailed = [];
-				for (let i = 0; i < failedApps.length; i++) {
-					const appName = failedApps[i];
-					const updated = await updateApp(appName, 1);
-					if (updated && updated.id) {
-						lclver[appName] = { version: fetchupdatedataver[appName] || 0, appid: updated.id };
-					} else {
-						stillFailed.push(appName);
-					}
-				}
-				await setSetting("versions", lclver, "defaultApps.json");
-				if (stillFailed.length > 0) {
-					console.error("These apps still failed after retry:", stillFailed);
-					await say("Some apps still failed to download: " + stillFailed.join(", "));
-				}
-			}
-		}
-		if (!initialization) {
-			closeElementedis();
-		}
-	});
-}
 async function prepareArrayToSearch() {
 	let arrayToSearch = [];
 	function scanFolder(folderPath, folderContents) {
@@ -1496,231 +1039,6 @@ async function rlstrtappse(event) {
 
 }
 
-function calculateSimilarity(string1, string2) {
-	const m = string1.length;
-	const n = string2.length;
-	const dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
-	for (let i = 0; i <= m; i++) {
-		for (let j = 0; j <= n; j++) {
-			if (i === 0) dp[i][j] = j;
-			else if (j === 0) dp[i][j] = i;
-			else if (string1[i - 1] === string2[j - 1]) dp[i][j] = dp[i - 1][j - 1];
-			else {
-				const penalty = (i + j) / (m + n);
-				dp[i][j] = 1 + Math.min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1] + penalty);
-			}
-		}
-	}
-	return 1 - dp[m][n] / Math.max(m, n);
-}
-function containsSmallSVGElement(str) {
-	var svgRegex = /^<svg\s*[^>]*>[\s\S]*<\/svg>$/i;
-	if (!svgRegex.test(str) || str.length > 10000) return false;
-
-	var idMap = {};
-	var idRegex = /\bid="([^"]+)"/g;
-	var urlRefRegex = /url\(#([^")]+)\)/g;
-
-	str = str.replace(idRegex, function (match, id) {
-		if (!idMap[id]) {
-			idMap[id] = 'svguid_' + Math.random().toString(36).substr(2, 8);
-		}
-		return `id="${idMap[id]}"`;
-	});
-
-	str = str.replace(urlRefRegex, function (match, id) {
-		return idMap[id] ? `url(#${idMap[id]})` : match;
-	});
-
-	return str;
-}
-
-let countdown, countdown2;
-function startTimer(minutes) {
-	document.getElementById("sleepbtns").style.display = "none";
-	clearInterval(countdown);
-	const now = Date.now();
-	const then = now + minutes * 60 * 1000;
-	displayTimeLeft(minutes * 60);
-	countdown = setInterval(() => {
-		const secondsLeft = Math.round((then - Date.now()) / 1000);
-		if (secondsLeft <= 0) {
-			clearInterval(countdown);
-			document.getElementById('sleeptimer').textContent = '00:00';
-			playBeeps();
-			document.getElementById('sleepwindow').close()
-			return;
-		}
-		displayTimeLeft(secondsLeft);
-	}, 1000);
-}
-function playBeeps() {
-	const context = new (window.AudioContext || window.webkitAudioContext)();
-	const now = context.currentTime;
-	const duration = 0.1;
-	const fadeDuration = 0.02;
-	const gap = 0.1;
-	const pitch = 700;
-	const rhythm = [
-		[0, 0.2, 0.4, 0.6],
-		[1.2, 1.4, 1.6, 1.8],
-		[2.4, 2.6, 2.8, 3.0]
-	];
-	const getOffsetTime = (index, time) => now + time + index * (4 * (duration + gap));
-	rhythm.forEach((set, index) => {
-		set.forEach(time => {
-			const offsetTime = getOffsetTime(index, time);
-			const oscillator = context.createOscillator();
-			const gainNode = context.createGain();
-			oscillator.type = 'triangle';
-			oscillator.frequency.setValueAtTime(pitch, offsetTime);
-			gainNode.gain.setValueAtTime(0, offsetTime);
-			gainNode.gain.linearRampToValueAtTime(1, offsetTime + fadeDuration); // Fade in
-			gainNode.gain.linearRampToValueAtTime(0, offsetTime + duration - fadeDuration); // Fade out
-			oscillator.connect(gainNode);
-			gainNode.connect(context.destination);
-			oscillator.start(offsetTime);
-			oscillator.stop(offsetTime + duration);
-		});
-	});
-}
-async function setMessage() {
-	const message = await ask('What should be the message?', 'Do not disturb...');
-	document.getElementById('sleepmessage').innerHTML = message;
-}
-
-function displayTimeLeft(seconds) {
-	const minutes = Math.floor(seconds / 60);
-	const remainderSeconds = seconds % 60;
-	const display = `${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
-	document.getElementById('sleeptimer').textContent = display;
-}
-
-async function notify(...args) {
-	if (nonotif) { return }
-	let appname = "System";
-	let [title = "Notification", description = "There is a notification", isid] = args;
-	let appID = notificationContext[isid]?.appID;
-	appname = (!(appID == undefined)) ? basename(await getFileNameByID(appID)) : appname;
-
-	if (document.getElementById("notification").style.display == "block") {
-		document.getElementById("notification").style.display = "none";
-		setTimeout(() => notify(title, description, appname), 2500);
-	}
-	var appnameb = document.getElementById('notifappName');
-	var descb = document.getElementById('notifappDesc');
-	var titleb = document.getElementById('notifTitle');
-	if (appnameb && descb && titleb) {
-		appnameb.innerText = appname;
-		descb.innerText = description;
-		titleb.innerText = title;
-		const windValues = Object.values(winds).map(wind => Number(wind.zIndex) || 0);
-		const maxWindValue = Math.max(...windValues);
-		document.getElementById("notification").style.zIndex = maxWindValue + 1;
-		document.getElementById("notification").style.display = "block";
-		document.getElementById("notification").onclick = () => {
-			openfile(appID);
-		}
-		setTimeout(function () {
-			document.getElementById("notification").style.display = "none";
-		}, 5000);
-	} else {
-		console.error("One or more DOM elements not found.");
-	}
-	const notificationID = genUID();
-	notifLog[notificationID] = { title, description, appname };
-	(isid) ? delete notificationContext[isid] : 0;
-}
-
-let toastInProgress = false;
-let totalDuration = 0;
-const maxToastDuration = 5000;
-let toastQueue = [];
-
-function toast(text, regref, duration = 5000,) {
-	let displayDuration = Math.min(duration, maxToastDuration);
-
-	if (toastInProgress) {
-		toastQueue.push({ text, duration: displayDuration });
-	} else {
-		totalDuration = displayDuration;
-		toastInProgress = true;
-		displayToast(text, displayDuration, regref);
-	}
-}
-
-function displayToast(text, duration, regref) {
-	var titleb = document.getElementById('toastdivtext');
-	if (titleb) {
-		titleb.innerText = text;
-		(async () => { insertSVG(await getAppIcon(0, notificationContext[regref]?.appID || "info"), document.getElementById('toasticon')); })();
-
-		const windValues = Object.values(winds).map(wind => Number(wind.zIndex) || 0);
-		const maxWindValue = Math.max(...windValues);
-		document.getElementById("toastdiv").style.zIndex = maxWindValue + 100;
-		document.getElementById("toastdiv").classList.add('notifpullanim');
-		document.getElementById("toastdiv").style.display = "block";
-
-		setTimeout(function () {
-			document.getElementById("toastdiv").classList.remove('closeEffect');
-		}, 200);
-
-		document.getElementById("toastdiv").onclick = function () {
-			document.getElementById("toastdiv").classList.add('closeEffect');
-			document.getElementById("toastdiv").style.display = "none";
-			toastInProgress = false;
-			if (toastQueue.length > 0) {
-				const nextToast = toastQueue.shift();
-				displayToast(nextToast.text, nextToast.duration);
-			}
-		};
-
-		setTimeout(function () {
-			document.getElementById("toastdiv").classList.add('closeEffect');
-			setTimeout(function () {
-				document.getElementById("toastdiv").style.display = "none";
-				toastInProgress = false;
-				if (toastQueue.length > 0) {
-					const nextToast = toastQueue.shift();
-					displayToast(nextToast.text, nextToast.duration);
-				}
-			}, 200);
-		}, duration);
-	} else {
-		console.error("DOM elements not found.");
-	}
-}
-
-function displayNotifications(x) {
-	if (x == "clear") {
-		notifLog = {};
-
-	}
-	const notifList = document.getElementById("notiflist");
-	notifList.innerHTML = "";
-	if (Object.values(notifLog).length == 0) {
-		document.querySelector(".notiflist").style.display = "none";
-	} else {
-		document.querySelector(".notiflist").style.display = "flex";
-	}
-	Object.values(notifLog).forEach(({ title, description, appname }) => {
-		const notifDiv = document.createElement("div");
-		notifDiv.className = "notification";
-		const titleDiv = document.createElement("div");
-		titleDiv.className = "notifTitle";
-		titleDiv.innerText = title;
-		const descDiv = document.createElement("div");
-		descDiv.className = "notifDesc";
-		descDiv.innerText = description;
-		const appNameDiv = document.createElement("div");
-		appNameDiv.className = "notifAppName";
-		appNameDiv.innerText = appname;
-		notifDiv.appendChild(appNameDiv);
-		notifDiv.appendChild(titleDiv);
-		notifDiv.appendChild(descDiv);
-		notifList.appendChild(notifDiv);
-	});
-}
 (async () => {
 	let appbarelement = document.getElementById("dock");
 	let dropZone = appbarelement;
@@ -1897,27 +1215,6 @@ async function realgenDesktop() {
 
 }
 
-async function renderWall() {
-	let x = await getSetting("wall");
-	if (x != undefined && x != '' && x != ' ') {
-		let unshrinkbsfX;
-		if (x.startsWith("http")) {
-			unshrinkbsfX = x;
-		} else {
-			unshrinkbsfX = await getFileById(x);
-			unshrinkbsfX = unshrinkbsfX.content;
-		}
-		setbgimagetourl(unshrinkbsfX);
-	}
-	document.getElementById("bgimage").onerror = async function (event) {
-		toast("It doesn't seem to work as the wallpaper...")
-		setbgimagetourl(novaFeaturedImage);
-		if (await getSetting("wall")) {
-			remSettingKey("wall");
-		}
-	};
-}
-
 async function opensearchpanel(preset = "") {
 	gid("seapppreview").style.display = "none";
 	if (appsHistory.length > 0) {
@@ -1943,24 +1240,7 @@ async function opensearchpanel(preset = "") {
 	gid('searchwindow').showModal();
 	prepareArrayToSearch()
 }
-function mtpetxt(str) {
-	if (!str) {
-		return;
-	}
-	try {
-		const parts = str.split('.');
-		return parts.length > 1 ? parts.pop() : '';
-	} catch (err) {
-		console.error(err)
-	}
-}
-function closeallwindows() {
-	Object.keys(winds).forEach(key => {
-		const taskId = key.slice(-12);
-		clwin(taskId);
-	});
-	gid("closeallwinsbtn").checked = true;
-}
+
 async function checkifpassright() {
 	lethalpasswordtimes = true;
 	var trypass = gid("loginform1").value;
@@ -2058,15 +1338,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 		}
 	});
 	const scriptSources = [
-		"scripts/fflate.js",
-		"scripts/encdec.js",
-		"scripts/kernel.js",
-		"scripts/ctxmenu.js",
-		"scripts/edgecases.js",
-		"scripts/scripties.js",
-		"scripts/windman.js",
-		"scripts/panels.js",
-		"scripts/ntx.js"
+		// "scripts/utlity.js", // utility and general tools
+		// "scripts/sw.js", // service worker for offline access
+		// "scripts/system32.js", // system configuration and filesystem management 
+		// "scripts/readwrite.js", // storage and memory management 
+		"scripts/fflate.js", // data compression
+		"scripts/encdec.js", // data encoding and decoding
+		"scripts/initialization.js", // first time setup
+		"scripts/novagui.js", // additional visual interfaces
+		"scripts/kernel.js", // application management and launching
+		"scripts/ctxmenu.js", // context menu generation
+		"scripts/edgecases.js", // edgecases and error handling
+		"scripts/scripties.js", // additional visual enhancements and utlity
+		"scripts/windman.js", // novaos window manager
+		"scripts/panels.js", // taskbar panels management
+		"scripts/ntx.js" // nova transaction exchange config
 	];
 
 	const loadScripts = async () => {
@@ -2192,7 +1478,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 async function appGroupModal(name, list) {
-	console.log(list)
 	const modal = gid("appgrpmodal");
 	const listElement = gid("appgrp_list");
 	const heading = gid("appgrp_name");
@@ -2242,17 +1527,4 @@ async function appGroupModal(name, list) {
 		} catch (err) { console.error(err) }
 
 	})
-}
-
-function setTitle(windowID, title) {
-	if (typeof title !== "string") {
-		console.error("Title must be a string.");
-		return;
-	}
-	const element = document.getElementById("window" + windowID + "titlespan");
-	if (element) {
-		element.innerText = title;
-	} else {
-		console.warn("Title element not found in the DOM.");
-	}
 }
